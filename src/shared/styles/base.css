@@ -141,6 +141,51 @@ select option { background: var(--surface); color: var(--ink); }
 :root[data-theme="dark"] select { color-scheme: dark; }
 :root[data-theme="light"] select { color-scheme: light; }
 
+.pw-field { position: relative; }
+.pw-field input { padding-right: 46px; }
+.pw-eye {
+  position: absolute; top: 50%; right: 7px; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--ink-3);
+  width: 32px; height: 32px; padding: 0; border-radius: 50%; display: grid; place-items: center;
+}
+.pw-eye:hover { color: var(--ink); background: var(--sun-soft); }
+.pw-eye svg { width: 18px; height: 18px; }
+.field input.input-warn, .field input.input-warn:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 18%, transparent);
+}
+.field-hint-warn {
+  margin-top: 7px; padding: 7px 11px; border-radius: 9px; font-size: 12.5px; line-height: 1.4;
+  background: var(--amber-soft); color: var(--amber);
+  border: 1px solid color-mix(in srgb, var(--amber) 25%, transparent);
+}
+.field-hint-warn.hint-under { margin: -9px 0 16px; }
+.field-hint { font-size: 12.5px; color: var(--ink-3); margin: 6px 0 0; }
+
+.code-cells { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; }
+.code-cell {
+  flex: 1 1 0; min-width: 0; max-width: 46px; height: 54px; padding: 0; text-align: center;
+  font-family: var(--mono); font-size: 20px; font-weight: 600; color: var(--navy); caret-color: var(--sun);
+  background: var(--sun-soft); border: 1.5px solid var(--sun-mist); border-radius: 12px;
+  transition: border-color .12s, background .12s, box-shadow .12s;
+}
+.code-cell:hover { border-color: var(--sun); }
+.code-cell:focus {
+  outline: none; background: var(--surface); border-color: var(--sun);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sun) 22%, transparent);
+}
+.code-cells-valid .code-cell { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+.code-cells-invalid { animation: codeShake .4s ease; }
+.code-cells-invalid .code-cell { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+@keyframes codeShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+@media (prefers-reduced-motion: reduce) { .code-cells-invalid { animation: none; } }
+
 .banner {
   display: flex; align-items: center; gap: 10px; border-radius: 12px; padding: 13px 17px;
   font-size: 14.5px; margin-bottom: 18px; border: 1px solid transparent;

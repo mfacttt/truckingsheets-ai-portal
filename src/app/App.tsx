@@ -8,6 +8,10 @@ import LandingPage from '@/pages/landing/ui/LandingPage'
 
 const LoginPage = lazy(() => import('@/pages/login/ui/LoginPage'))
 const DashboardPage = lazy(() => import('@/pages/dashboard/ui/DashboardPage'))
+const AiAnalyticsPage = lazy(() => import('@/pages/ai-analytics/ui/AiAnalyticsPage'))
+const TeamPage = lazy(() => import('@/pages/team/ui/TeamPage'))
+const PlansPage = lazy(() => import('@/pages/plans/ui/PlansPage'))
+const BillingPage = lazy(() => import('@/pages/billing/ui/BillingPage'))
 const NotFoundPage = lazy(() => import('@/pages/not-found/ui/NotFoundPage'))
 
 function RouteFallback() {
@@ -24,6 +28,10 @@ function RouteFallback() {
 function resolveRoute(path: string): ReactNode {
   if (path === '/') return <LandingPage />
   if (path === '/login') return <LoginPage />
+  if (path === '/dashboard/ai') return <AiAnalyticsPage />
+  if (path === '/dashboard/team') return <TeamPage />
+  if (path === '/dashboard/plans') return <PlansPage />
+  if (path === '/dashboard/billing') return <BillingPage />
   if (path.startsWith('/dashboard')) return <DashboardPage />
   return <NotFoundPage />
 }

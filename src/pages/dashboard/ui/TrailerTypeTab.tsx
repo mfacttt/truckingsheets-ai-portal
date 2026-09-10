@@ -18,8 +18,16 @@ import { Checklist } from '@/widgets/premium-table/ui/Checklist'
 import { deskColor } from '@/entities/dashboard/lib/aggregate'
 import { formatMoney } from '@/shared/lib/format/number'
 
-export function TrailerTypeTab({ loads, subTab }: { loads: Load[]; subTab: string }) {
-  const sub = subTab === 'units' || subTab === 'lines' ? subTab : 'overview'
+type SubTab = 'overview' | 'units' | 'lines'
+
+const SUB_TABS: { value: SubTab; label: string }[] = [
+  { value: 'overview', label: 'Overview' },
+  { value: 'units', label: 'Units & economics' },
+  { value: 'lines', label: 'Weekly lines' },
+]
+
+export function TrailerTypeTab({ loads }: { loads: Load[] }) {
+  const [sub, setSub] = useState<SubTab>('overview')
   const [primary, setPrimary] = useState('All')
   const [unitSel, setUnitSel] = useState<Set<number>>(new Set())
   const [unitFilterOn, setUnitFilterOn] = useState(false)
@@ -67,7 +75,19 @@ export function TrailerTypeTab({ loads, subTab }: { loads: Load[]; subTab: strin
   return (
     <>
       <div className="dcard-inline-controls">
-        <div className="dfield">
+        <div className="seg-pill-row">
+          {SUB_TABS.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              className={`seg-pill${sub === t.value ? ' is-active' : ''}`}
+              onClick={() => setSub(t.value)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div className="dfield" style={{ marginLeft: 'auto' }}>
           <label>Primary selection</label>
           <select className="dselect" value={primary} onChange={(e) => setPrimary(e.target.value)} style={{ minWidth: 140 }}>
             <option value="All">All families</option>

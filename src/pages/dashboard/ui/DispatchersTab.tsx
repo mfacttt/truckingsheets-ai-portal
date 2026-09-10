@@ -25,6 +25,14 @@ import { formatMoney, formatMiles, formatNumber, formatRpm } from '@/shared/lib/
 
 const TOP_N_OPTIONS = [10, 15, 20, 0] as const
 
+type SubTab = 'overview' | 'deskunits' | 'units'
+
+const SUB_TABS: { value: SubTab; label: string }[] = [
+  { value: 'overview', label: 'Overview' },
+  { value: 'deskunits', label: 'Dispatchers & units' },
+  { value: 'units', label: 'Units' },
+]
+
 const DESK_UNIT_COLUMNS: PremiumColumn<DeskUnitRow>[] = [
   { key: 'gross', label: 'Σ gross', value: (r) => r.gross, render: (r) => formatMoney(r.gross), heat: true, leader: true },
   { key: 'rpm', label: 'RPM', value: (r) => r.rpm, render: (r) => formatRpm(r.rpm), heat: true, leader: true },
@@ -64,8 +72,8 @@ const UNIT_COLUMNS: PremiumColumn<UnitEconomicsRow>[] = [
   },
 ]
 
-export function DispatchersTab({ loads, subTab, onFormula }: { loads: Load[]; subTab: string; onFormula(code: string): void }) {
-  const sub = subTab === 'deskunits' || subTab === 'units' ? subTab : 'overview'
+export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(code: string): void }) {
+  const [sub, setSub] = useState<SubTab>('overview')
   const [topN, setTopN] = useState<number>(15)
   const [familyFilter, setFamilyFilter] = useState('All')
   const [deskSel, setDeskSel] = useState<Set<string>>(new Set())
@@ -150,6 +158,21 @@ export function DispatchersTab({ loads, subTab, onFormula }: { loads: Load[]; su
 
   return (
     <>
+      <div className="dcard-inline-controls">
+        <div className="seg-pill-row">
+          {SUB_TABS.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              className={`seg-pill${sub === t.value ? ' is-active' : ''}`}
+              onClick={() => setSub(t.value)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {deskFilterOn && (
         <div className="dcontrols" style={{ marginBottom: 16 }}>
           <Checklist label="Dispatchers" options={allDeskNames} selected={deskSel} onChange={setDeskSel} />

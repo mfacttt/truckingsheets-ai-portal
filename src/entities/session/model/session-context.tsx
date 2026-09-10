@@ -1,61 +1,76 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
-import { DEMO_SESSION_STORAGE_KEY } from '@/shared/config/constants'
-
-export interface DemoUser {
-  email: string
-  company: string
-}
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react'
+import { SESSION_EXPIRED_EVENT } from '@/shared/config/constants'
+import { getCurrentUser, logout, tryRestoreSession } from '../api/session-api'
+import type { CurrentUser } from './types'
 
 interface SessionValue {
-  user: DemoUser | null
-  signIn(user: DemoUser): void
-  signOut(): void
+  user: CurrentUser | null
+  setUser(user: CurrentUser | null): void
+  restoring: boolean
+  sessionExpired: boolean
+  signOut(): Promise<void>
 }
 
-const SessionContext = createContext<SessionValue>({
-  user: null,
-  signIn: () => undefined,
-  signOut: () => undefined,
-})
-
-function readStoredUser(): DemoUser | null {
-  try {
-    const raw = localStorage.getItem(DEMO_SESSION_STORAGE_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as Partial<DemoUser>
-    if (typeof parsed.email !== 'string') return null
-    return { email: parsed.email, company: typeof parsed.company === 'string' ? parsed.company : '' }
-  } catch {
-    return null
-  }
-}
+const SessionContext = createContext<SessionValue | null>(null)
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<DemoUser | null>(() => readStoredUser())
+  const [user, setUserState] = useState<CurrentUser | null>(null)
+  const [restoring, setRestoring] = useState(true)
+  const [sessionExpired, setSessionExpired] = useState(false)
 
-  const signIn = useCallback((next: DemoUser) => {
-    setUser(next)
-    try {
-      localStorage.setItem(DEMO_SESSION_STORAGE_KEY, JSON.stringify(next))
-    } catch {
-      /* private browsing / storage disabled — session stays in-memory only */
+  const setUser = useCallback((next: CurrentUser | null) => {
+    setUserState(next)
+    if (next) setSessionExpired(false)
+  }, [])
+
+  useEffect(() => {
+    let alive = true
+    void (async () => {
+      const existing = getCurrentUser()
+      if (existing) {
+        if (alive) setUserState(existing)
+      } else {
+        const restored = await tryRestoreSession()
+        if (alive && restored) setUserState(restored)
+      }
+      if (alive) setRestoring(false)
+    })()
+
+    const onExpired = () => {
+      setUserState((current) => {
+        if (current) setSessionExpired(true)
+        return null
+      })
+    }
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired)
+    return () => {
+      alive = false
+      window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired)
     }
   }, [])
 
-  const signOut = useCallback(() => {
-    setUser(null)
-    try {
-      localStorage.removeItem(DEMO_SESSION_STORAGE_KEY)
-    } catch {
-      /* ignore */
-    }
+  const signOut = useCallback(async () => {
+    await logout()
+    setUserState(null)
+    setSessionExpired(false)
   }, [])
 
   return (
-    <SessionContext.Provider value={{ user, signIn, signOut }}>{children}</SessionContext.Provider>
+    <SessionContext.Provider value={{ user, setUser, restoring, sessionExpired, signOut }}>
+      {children}
+    </SessionContext.Provider>
   )
 }
 
 export function useSession(): SessionValue {
-  return useContext(SessionContext)
+  const ctx = useContext(SessionContext)
+  if (!ctx) throw new Error('useSession must be used inside <SessionProvider>')
+  return ctx
 }

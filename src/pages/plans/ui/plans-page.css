@@ -1,0 +1,36 @@
+.plans-page-head { margin-bottom: 24px; }
+.plans-page-head h1 { font-size: 1.6rem; margin-bottom: 6px; }
+.plans-page-head p { color: var(--ink-2); font-size: 14.5px; }
+
+.plans-current {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 28px; padding: 18px 22px;
+  border-radius: 16px; background: var(--grad-sun); color: #fff; box-shadow: 0 12px 30px -12px rgba(244,121,32,.5);
+}
+.plans-current-label { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; opacity: .85; }
+.plans-current-name { font-family: var(--display); font-weight: 800; font-size: 22px; margin-top: 2px; }
+.plans-current-note { margin-left: auto; font-size: 13px; opacity: .9; text-align: right; }
+
+.plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.pplan {
+  position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+  padding: 26px 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;
+}
+.pplan-featured { border-color: var(--sun); border-width: 2px; box-shadow: 0 20px 44px -16px rgba(244,121,32,.35); }
+.pplan-flag {
+  position: absolute; top: -12px; left: 24px; background: var(--grad-sun); color: #fff;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  padding: 4px 11px; border-radius: 20px;
+}
+.pplan-name { font-size: 1.1rem; margin-bottom: 4px; }
+.pplan-fleet { font-size: 12.5px; color: var(--ink-3); margin-bottom: 14px; }
+.pplan-price { display: flex; align-items: baseline; gap: 5px; margin-bottom: 10px; }
+.pplan-price b { font-family: var(--display); font-weight: 800; font-size: 32px; color: var(--navy); }
+.pplan-price span { color: var(--ink-3); font-size: 13px; }
+.pplan-desc { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; flex: 1; margin-bottom: 16px; }
+.pplan .btn { width: 100%; }
+.pplan-current-badge {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700;
+  color: var(--green); background: var(--green-soft); padding: 9px 0; border-radius: 10px; justify-content: center;
+}
+
+@media (max-width: 900px) { .plans-grid { grid-template-columns: 1fr; } }

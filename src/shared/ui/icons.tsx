@@ -14,6 +14,34 @@ export const TruckIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2.5 6.5h10v10h-10z" /><path d="M12.5 9.5h4l4 4v3h-8z" /><circle cx="6.5" cy="18" r="1.9" /><circle cx="17" cy="18" r="1.9" /></svg>
 )
 
+export const EyeIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" /><circle cx="12" cy="12" r="3" /></svg>
+)
+
+export const EyeOffIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 5c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24M1 1l22 22" /></svg>
+)
+
+export const MailIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2.8" y="4.8" width="18.4" height="14.4" rx="2.4" /><path d="m3.5 6.5 8.5 6.5 8.5-6.5" /></svg>
+)
+
+export const LockIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.2" /><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" /><path d="M12 14.6v2.3" /></svg>
+)
+
+export const LayersIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5z" /><path d="m3.5 12.5 8.5 4.7 8.5-4.7M3.5 16.7l8.5 4.7 8.5-4.7" /></svg>
+)
+
+export const CardIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2.8" y="5" width="18.4" height="14" rx="2.4" /><path d="M2.8 9.6h18.4M6.4 15h4" /></svg>
+)
+
+export const SparkleIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3.5c.5 2.8 1.4 4.5 2.6 5.7 1.2 1.2 2.9 2.1 5.7 2.6-2.8.5-4.5 1.4-5.7 2.6-1.2 1.2-2.1 2.9-2.6 5.7-.5-2.8-1.4-4.5-2.6-5.7-1.2-1.2-2.9-2.1-5.7-2.6 2.8-.5 4.5-1.4 5.7-2.6 1.2-1.2 2.1-2.9 2.6-5.7z" /><path d="M19 3v3M17.5 4.5h3" /></svg>
+)
+
 export const SunIcon = () => (
   <svg className="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.4" /><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3 19 19M19 5l-1.7 1.7M6.7 17.3 5 19" /></svg>
 )

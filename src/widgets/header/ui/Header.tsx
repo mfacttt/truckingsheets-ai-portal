@@ -18,7 +18,7 @@ function UserMenu() {
 
   function handleSignOut() {
     setOpen(false)
-    signOut()
+    void signOut()
     navigate('/')
   }
 
