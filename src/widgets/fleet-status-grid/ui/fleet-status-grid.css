@@ -1,0 +1,52 @@
+.fs-toolbar { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.fs-toolbar input[type="date"] {
+  font: inherit; font-size: 13px; padding: 7px 10px; border-radius: 9px;
+  border: 1px solid var(--line-cool); background: var(--surface); color: var(--ink);
+}
+.fs-meta { font-size: 12.5px; color: var(--ink-3); margin-bottom: 10px; }
+.fs-warn {
+  display: flex; align-items: center; gap: 9px; font-size: 13px; margin-bottom: 14px;
+  padding: 10px 14px; border-radius: 11px; background: var(--amber-soft); color: var(--amber);
+  border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent);
+}
+.fs-warn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+.fs-ring-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; font-size: 12px; color: var(--ink-2); }
+.fs-ring-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.fs-ring-legend i { width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid currentColor; background: transparent; }
+
+.fs-grid-wrap { overflow: auto; border-radius: 12px; border: 1px solid var(--line); max-height: 640px; }
+table.fs-grid { border-collapse: collapse; width: 100%; font-size: 12px; }
+table.fs-grid thead th {
+  position: sticky; top: 0; z-index: 2; background: var(--surface); border-bottom: 2px solid var(--line);
+  padding: 8px 6px; font-weight: 600; color: var(--ink-2); text-align: center; white-space: nowrap; min-width: 46px;
+}
+table.fs-grid thead th.is-weekend { background: color-mix(in srgb, var(--line) 30%, var(--surface)); }
+table.fs-grid thead th:first-child { position: sticky; left: 0; z-index: 3; text-align: left; min-width: 96px; background: var(--surface); }
+table.fs-grid tbody th {
+  position: sticky; left: 0; z-index: 1; background: var(--card); text-align: left; padding: 6px 10px;
+  font-weight: 700; color: var(--navy); white-space: nowrap; border-right: 1px solid var(--line);
+}
+table.fs-grid tbody td { padding: 3px; text-align: center; border-bottom: 1px solid color-mix(in srgb, var(--line) 50%, transparent); }
+table.fs-grid tbody tr:hover td, table.fs-grid tbody tr:hover th { background: color-mix(in srgb, var(--sun-soft) 32%, var(--card)); }
+
+.fs-bubble { width: 28px; height: 28px; border-radius: 50%; margin: 0 auto; display: grid; place-items: center; font-size: 8px; color: #fff; font-weight: 700; box-sizing: border-box; }
+.fs-bubble.st-pickup { background: radial-gradient(circle at 32% 28%, #3FCB78, var(--bubble-pickup)); }
+.fs-bubble.st-transit { background: radial-gradient(circle at 32% 28%, #6CA6F2, var(--bubble-transit)); }
+.fs-bubble.st-delivery { background: radial-gradient(circle at 32% 28%, #B08CF7, var(--bubble-delivery)); }
+.fs-bubble.st-turn { background: conic-gradient(var(--bubble-delivery) 0deg 180deg, var(--bubble-pickup) 180deg 360deg); }
+.fs-bubble.st-idle { background: var(--bubble-idle); opacity: .4; }
+.fs-bubble.has-ring { border: 2.5px solid var(--ring, transparent); }
+.fs-bubble .fs-cap { font-size: 8px; line-height: 1; }
+.fs-bubble.st-idle .fs-cap { color: transparent; }
+
+tfoot.fs-foot th, tfoot.fs-foot td { border-top: 2px solid var(--line); font-weight: 700; padding: 6px 4px; }
+tfoot.fs-foot th { position: sticky; left: 0; background: var(--card); }
+tfoot.fs-foot .loaded td { color: var(--sky-deep); }
+tfoot.fs-foot .rate td { font-size: 10px; color: var(--ink-2); }
+
+.fs-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; font-size: 13px; color: var(--ink-2); }
+.fs-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.fs-legend i { width: 13px; height: 13px; border-radius: 50%; display: inline-block; }
+
+.fs-empty { text-align: center; padding: 40px 20px; color: var(--ink-3); font-size: 14px; }

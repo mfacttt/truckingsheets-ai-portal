@@ -1,0 +1,71 @@
+.auth-page { padding: 0; min-height: calc(100dvh - 70px); display: flex; align-items: stretch; }
+.auth-grid {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  min-height: calc(100dvh - 70px); width: 100%; max-width: 1320px; margin: 0 auto;
+}
+.auth-side {
+  position: relative; overflow: hidden; display: flex; align-items: center;
+  padding: 64px 56px; background: var(--grad-navy); color: #E8ECF5;
+}
+.auth-side::before {
+  content: ''; position: absolute; left: -180px; bottom: -220px; width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(30,122,191,.32), transparent 65%);
+  animation: authOrb 12s ease-in-out infinite;
+}
+.auth-side::after {
+  content: ''; position: absolute; right: -140px; top: -160px; width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(244,121,32,.22), transparent 62%);
+  animation: authOrb 16s ease-in-out infinite reverse;
+}
+@keyframes authOrb { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-24px); } }
+@media (prefers-reduced-motion: reduce) { .auth-side::before, .auth-side::after { animation: none; } }
+.auth-side-in { position: relative; max-width: 440px; }
+.auth-side-in > * { animation: authRise .6s cubic-bezier(.16,.8,.3,1) both; }
+.auth-side-in > *:nth-child(1) { animation-delay: 40ms; }
+.auth-side-in > *:nth-child(2) { animation-delay: 110ms; }
+.auth-side-in > *:nth-child(3) { animation-delay: 180ms; }
+.auth-side-in > *:nth-child(4) { animation-delay: 250ms; }
+@keyframes authRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .auth-side-in > * { animation: none; } }
+.auth-side .eyebrow { color: var(--sky-bright); }
+.auth-side .eyebrow::before { background: var(--sky-bright); }
+.auth-side h1 { color: #FFF6EC; font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin-bottom: 16px; }
+.auth-side-sub { color: #B9C2D8; font-size: 17px; margin-bottom: 30px; }
+.auth-benefits { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.auth-benefits li { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; color: #D7DCE8; }
+.auth-benefit-ic {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+  background: rgba(52,211,153,.18); color: #34D399; display: grid; place-items: center;
+}
+.auth-benefit-ic svg { width: 13px; height: 13px; }
+
+.auth-box { display: flex; align-items: center; justify-content: center; padding: 56px 48px; }
+.auth-box > div { animation: authRise .55s cubic-bezier(.16,.8,.3,1) both; animation-delay: 120ms; }
+.auth-box-head { text-align: center; margin-bottom: 26px; }
+.auth-box-ic {
+  width: 54px; height: 54px; border-radius: 15px; margin: 0 auto 16px; display: grid; place-items: center;
+  background: var(--grad-sun); color: #fff; box-shadow: 0 8px 22px rgba(244,121,32,.4);
+  animation: authIcPop .6s cubic-bezier(.16,.9,.3,1.2) both; animation-delay: 200ms;
+}
+@keyframes authIcPop { from { opacity: 0; transform: scale(.5) rotate(-12deg); } to { opacity: 1; transform: none; } }
+.auth-box-ic svg { width: 27px; height: 27px; }
+.auth-box .btn-primary { position: relative; overflow: hidden; }
+.auth-box .btn-primary::after {
+  content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.4), transparent);
+  animation: btnShine 3.2s ease-in-out infinite; animation-delay: 1s;
+}
+@keyframes btnShine { 0% { left: -60%; } 55%,100% { left: 130%; } }
+@media (prefers-reduced-motion: reduce) {
+  .auth-box > div, .auth-box-ic { animation: none; }
+  .auth-box .btn-primary::after { display: none; }
+}
+.auth-box-head h2 { margin-bottom: 8px; }
+.auth-box-head p { color: var(--ink-2); font-size: 15px; }
+.auth-fineprint { margin-top: 14px; text-align: center; font-size: 12.5px; color: var(--ink-3); }
+
+@media (max-width: 900px) {
+  .auth-grid { grid-template-columns: 1fr; }
+  .auth-side { display: none; }
+  .auth-box { padding: 40px 24px; }
+}

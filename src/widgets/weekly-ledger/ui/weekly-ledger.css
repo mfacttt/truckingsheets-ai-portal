@@ -1,0 +1,32 @@
+.ledger-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+.ledger-head-title h2 { font-size: 1.1rem; }
+.ledger-controls { display: flex; align-items: center; gap: 10px; }
+.ledger-controls select {
+  font: inherit; font-size: 13px; padding: 6px 9px; border-radius: 8px; border: 1px solid var(--line-cool);
+  background: var(--surface); color: var(--ink);
+}
+
+.ledger-table-wrap { overflow-x: auto; border-radius: 12px; }
+table.ledger {
+  border-collapse: separate; border-spacing: 0 5px; width: 100%; font-size: 13.5px; min-width: 760px;
+}
+table.ledger thead th {
+  background: linear-gradient(132deg, #B4470C 0%, var(--sun) 55%, #E88B36 100%); color: #FFF6EC;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  padding: 10px 14px; text-align: right; white-space: nowrap; cursor: pointer; user-select: none;
+  position: sticky; top: 0; z-index: 1;
+}
+table.ledger thead th:first-child { text-align: left; border-radius: 10px 0 0 10px; cursor: default; }
+table.ledger thead th:last-child { border-radius: 0 10px 10px 0; text-align: right; cursor: default; }
+table.ledger thead th.is-sorted { color: #FFE9CF; }
+.ledger-sort-tri { display: inline-flex; flex-direction: column; margin-left: 4px; font-size: 6px; line-height: .7; vertical-align: middle; }
+.ledger-sort-tri span { opacity: .35; }
+.ledger-sort-tri span.is-active { opacity: 1; color: #F6C945; }
+
+table.ledger tbody td { background: var(--card); padding: 9px 14px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+table.ledger tbody td:first-child { text-align: left; border-radius: 10px 0 0 10px; font-weight: 600; color: var(--navy); }
+table.ledger tbody td:last-child { border-radius: 0 10px 10px 0; }
+table.ledger tbody tr:hover td { background: color-mix(in srgb, var(--sun-soft) 45%, var(--card)); }
+
+.ledger-star { color: #F6C945; margin-left: 4px; text-shadow: 0 0 6px rgba(246,201,69,.5); }
+.ledger-reset { font-size: 12.5px; }

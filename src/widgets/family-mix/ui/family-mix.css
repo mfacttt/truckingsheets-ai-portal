@@ -1,0 +1,6 @@
+.mix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
+@media (max-width: 860px) { .mix-grid { grid-template-columns: 1fr; } }
+.mix-legend { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.mix-legend-row { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--ink-2); }
+.mix-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.mix-legend-val { margin-left: auto; font-weight: 600; color: var(--navy); font-variant-numeric: tabular-nums; }

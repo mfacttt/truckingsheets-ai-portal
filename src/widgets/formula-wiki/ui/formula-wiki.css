@@ -1,0 +1,47 @@
+.fw-veil {
+  position: fixed; inset: 0; z-index: 500; background: rgba(13,20,35,.55);
+  display: grid; place-items: center; padding: 20px;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  animation: fwVeil .2s ease both;
+}
+@keyframes fwVeil { from { opacity: 0; } to { opacity: 1; } }
+.fw-modal {
+  background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+  box-shadow: 0 40px 90px -24px rgba(13,31,60,.6), var(--shadow-lg);
+  width: 100%; max-width: 780px; max-height: min(84vh, 640px); display: grid;
+  grid-template-columns: 200px 1fr; overflow: hidden;
+  animation: fwIn .34s cubic-bezier(.16,.9,.3,1.05) both;
+}
+@keyframes fwIn { from { opacity: 0; transform: translateY(24px) scale(.94); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .fw-modal, .fw-veil { animation: none; } }
+
+.fw-nav { background: var(--ground); border-right: 1px solid var(--line); padding: 14px 10px; overflow-y: auto; }
+.fw-nav-item {
+  display: block; width: 100%; text-align: left; border: none; background: none; cursor: pointer;
+  padding: 9px 12px; border-radius: 9px; font: inherit; font-size: 13.5px; color: var(--ink-2); margin-bottom: 2px;
+}
+.fw-nav-item:hover { background: var(--sun-soft); color: var(--sun-deep); }
+.fw-nav-item.is-active { background: var(--grad-sun); color: #fff; font-weight: 600; }
+
+.fw-body { padding: 24px 28px; overflow-y: auto; position: relative; }
+.fw-close {
+  position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%;
+  border: none; background: none; color: var(--ink-3); cursor: pointer; display: grid; place-items: center;
+}
+.fw-close:hover { background: var(--sun-soft); color: var(--sun-deep); }
+.fw-close svg { width: 16px; height: 16px; }
+.fw-body h3 { font-size: 1.15rem; margin-bottom: 14px; padding-right: 30px; }
+.fw-body p { color: var(--ink-2); font-size: 14.5px; margin: 0 0 10px; line-height: 1.6; }
+.fw-body h4 { font-size: 13.5px; margin: 16px 0 4px; color: var(--navy); }
+.fw-body ol, .fw-body ul { color: var(--ink-2); font-size: 14.5px; padding-left: 20px; margin: 0 0 10px; }
+.fw-body li { margin-bottom: 4px; }
+.fw-body .fw-formula {
+  font-family: var(--mono); font-size: 13px; background: var(--sun-soft); color: var(--sun-deep);
+  border: 1px solid var(--sun-mist); border-radius: 8px; padding: 9px 12px; margin-bottom: 10px;
+}
+
+@media (max-width: 620px) {
+  .fw-modal { grid-template-columns: 1fr; max-height: 90vh; }
+  .fw-nav { display: flex; overflow-x: auto; gap: 4px; border-right: none; border-bottom: 1px solid var(--line); padding: 10px; }
+  .fw-nav-item { white-space: nowrap; margin-bottom: 0; }
+}

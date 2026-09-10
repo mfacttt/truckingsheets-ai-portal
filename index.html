@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trucking Sheets AI — Fleet analytics from your dispatch sheet</title>
+    <meta
+      name="description"
+      content="Turns the loads already in your Google Sheet into a live fleet dashboard: weekly gross, RPM and revenue per truck, sliced by trailer type or dispatcher."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='4' y1='4' x2='36' y2='36' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23FF9633'/%3E%3Cstop offset='.52' stop-color='%23F47920'/%3E%3Cstop offset='1' stop-color='%231E7ABF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='2' y='2' width='36' height='36' rx='11' fill='url(%23g)'/%3E%3Crect x='10' y='22' width='4.6' height='8' rx='1.6' fill='%23fff' fill-opacity='.92'/%3E%3Crect x='17.7' y='17' width='4.6' height='13' rx='1.6' fill='%23fff' fill-opacity='.92'/%3E%3Crect x='25.4' y='11' width='4.6' height='19' rx='1.6' fill='%23fff'/%3E%3Cpath d='M9 31.5h22' stroke='%23fff' stroke-opacity='.6' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <script>
+      try {
+        var t = localStorage.getItem('ts-theme')
+        if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t)
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/app/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+.cohort-card {
+  background: linear-gradient(165deg, #DCE8F8, #E8F0FB, #EEF4FC); border: 1px solid var(--line-cool);
+  border-radius: 16px; padding: 4px; margin-bottom: 22px; box-shadow: var(--shadow-sm);
+}
+:root[data-theme="dark"] .cohort-card { background: linear-gradient(165deg, #1B2438, #202B42, #212C40); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cohort-card { background: linear-gradient(165deg, #1B2438, #202B42, #212C40); } }
+.cohort-head { padding: 16px 20px 10px; }
+.cohort-head h2 { font-size: 1.05rem; }
+.cohort-table-wrap { overflow-x: auto; padding: 0 6px 6px; }
+table.cohort { border-collapse: separate; border-spacing: 0 4px; width: 100%; font-size: 13.5px; min-width: 820px; }
+table.cohort thead th {
+  background: linear-gradient(135deg,#8A3A0B,var(--sun-deep) 55%,var(--sun-bright)); color: #FFF6EC;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  padding: 9px 12px; text-align: right; white-space: nowrap;
+}
+table.cohort thead th:first-child { text-align: left; border-radius: 9px 0 0 9px; }
+table.cohort thead th:last-child { border-radius: 0 9px 9px 0; }
+table.cohort tbody td { background: var(--card); padding: 9px 12px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+table.cohort tbody td:first-child { text-align: left; border-radius: 9px 0 0 9px; font-weight: 700; }
+table.cohort tbody td:last-child { border-radius: 0 9px 9px 0; }
+table.cohort .fam-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; }
+.cohort-star { color: #F6C945; margin-left: 4px; }

@@ -1,0 +1,108 @@
+@font-face { font-family: 'Baloo 2'; src: url('/fonts/Baloo2.woff2') format('woff2'); font-weight: 400 800; font-display: swap; }
+@font-face { font-family: 'Roboto'; src: url('/fonts/Roboto.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Roboto Mono'; src: url('/fonts/RobotoMono.woff2') format('woff2'); font-weight: 100 700; font-display: swap; }
+
+:root {
+  --sun: #F47920;
+  --sun-bright: #FF9633;
+  --sun-deep: #E06A12;
+  --sun-press: #C85C08;
+  --sun-soft: #FDEEE0;
+  --sun-mist: #FBDDC0;
+  --grad-sun: linear-gradient(135deg, var(--sun-bright), var(--sun) 55%, var(--sun-deep));
+
+  --sky: #1E7ABF;
+  --sky-bright: #2DB7C9;
+  --sky-deep: #14568C;
+  --sky-press: #0D3F68;
+  --sky-soft: #E8F2FB;
+  --sky-mist: #D3E8F7;
+  --grad-sky: linear-gradient(135deg, var(--sky-bright), var(--sky) 55%, var(--sky-deep));
+  --grad-navy: linear-gradient(135deg, #22345C, #0D1F3C 55%, #14568C);
+
+  --amber: #B7791F;
+  --amber-soft: #FCF3DF;
+
+  --navy: #0D1F3C;
+  --ink: #2B3346;
+  --ink-2: #616B7D;
+  --ink-3: #8F98A8;
+
+  --ground: #F7F8FA;
+  --surface: #FFFFFF;
+  --card: #FFFFFF;
+  --line: #E2E6EC;
+  --line-cool: #D8DEE8;
+
+  --green: #0F9D58;
+  --green-soft: #E6F4EA;
+  --red: #D93025;
+  --red-soft: #FCE8E6;
+
+  /* trailer-family palette — shared with the Fleet Analytics engine */
+  --fam-reefer: #0D1F3C;
+  --fam-dryvan: #2DB7C9;
+  --fam-flatbed: #F47920;
+  --fam-stepdeck: #9333EA;
+  --fam-rgm: #B85C38;
+  --fam-local: #7C3AED;
+  --fam-other: #94A3B8;
+
+  /* fleet-status bubble states */
+  --bubble-pickup: #1B9D5C;
+  --bubble-transit: #1A73E8;
+  --bubble-delivery: #7C3AED;
+  --bubble-idle: #AEB4C0;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 1px 3px rgba(13,31,60,.10), 0 1px 6px rgba(13,31,60,.06);
+  --shadow-md: 0 4px 16px rgba(13,31,60,.12), 0 2px 6px rgba(13,31,60,.08);
+  --shadow-lg: 0 18px 50px rgba(13,31,60,.16), 0 6px 18px rgba(13,31,60,.08);
+  --card-highlight: inset 0 1px 0 rgba(255,255,255,0);
+
+  --display: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  --body: 'Roboto', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'Roboto Mono', ui-monospace, 'Cascadia Mono', monospace;
+}
+
+:root[data-theme="dark"] {
+  --sky-soft: #0F273D; --sky-mist: #123252; --sky-deep: #6BC4D8;
+  --sun-soft: #33230F;
+  --amber: #E8B04B; --amber-soft: #33270F;
+  --navy: #F0F3F8;
+  --ink: #D6DAE3; --ink-2: #A2A9B8; --ink-3: #757C8C;
+  --ground: #12151C; --surface: #1B1F29; --card: #232833;
+  --line: #363C49; --line-cool: #3A4150;
+  --green: #34D399; --green-soft: #14311F;
+  --red: #F87171; --red-soft: #3A1715;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.4), 0 1px 8px rgba(0,0,0,.28);
+  --shadow-md: 0 6px 20px rgba(0,0,0,.42), 0 2px 8px rgba(0,0,0,.3);
+  --shadow-lg: 0 20px 50px rgba(0,0,0,.48), 0 8px 20px rgba(0,0,0,.32);
+  --card-highlight: inset 0 1px 0 rgba(255,255,255,.035);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sky-soft: #0F273D; --sky-mist: #123252; --sky-deep: #6BC4D8;
+    --sun-soft: #33230F;
+    --amber: #E8B04B; --amber-soft: #33270F;
+    --navy: #F0F3F8;
+    --ink: #D6DAE3; --ink-2: #A2A9B8; --ink-3: #757C8C;
+    --ground: #12151C; --surface: #1B1F29; --card: #232833;
+    --line: #363C49; --line-cool: #3A4150;
+    --green: #34D399; --green-soft: #14311F;
+    --red: #F87171; --red-soft: #3A1715;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.4), 0 1px 8px rgba(0,0,0,.28);
+    --shadow-md: 0 6px 20px rgba(0,0,0,.42), 0 2px 8px rgba(0,0,0,.3);
+    --shadow-lg: 0 20px 50px rgba(0,0,0,.48), 0 8px 20px rgba(0,0,0,.32);
+    --card-highlight: inset 0 1px 0 rgba(255,255,255,.035);
+  }
+}
+
+.ico-moon { display: none; }
+:root[data-theme="dark"] .ico-sun { display: none; }
+:root[data-theme="dark"] .ico-moon { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ico-sun { display: none; }
+  :root:not([data-theme="light"]) .ico-moon { display: block; }
+}
