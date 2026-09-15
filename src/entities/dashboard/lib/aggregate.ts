@@ -314,10 +314,21 @@ export interface WeeklyUnitPoint {
   [unitId: string]: number
 }
 
+export type UnitWeeklyMetric = 'gross' | 'rpm' | 'miles' | 'loads' | 'avgLoadRate' | 'pctGross'
+
+export const UNIT_WEEKLY_METRIC_LABELS: Record<UnitWeeklyMetric, string> = {
+  gross: 'Σ gross',
+  rpm: 'RPM',
+  miles: 'Σ miles',
+  loads: 'Loads',
+  avgLoadRate: 'Avg load rate',
+  pctGross: '% Σ gross',
+}
+
 export function weeklyByUnit(
   loads: Load[],
   unitIds: number[],
-  metric: 'gross' | 'rpm' | 'miles' | 'loads',
+  metric: UnitWeeklyMetric,
 ): WeeklyUnitPoint[] {
   const byWeek = new Map<number, Load[]>()
   for (const l of loads) {
@@ -328,15 +339,32 @@ export function weeklyByUnit(
   const weeks = [...byWeek.keys()].sort((a, b) => a - b)
   return weeks.map((week) => {
     const rows = byWeek.get(week) ?? []
+    const weekGross = rows.reduce((s, r) => s + r.grossRate, 0)
     const point: WeeklyUnitPoint = { week }
     for (const uid of unitIds) {
       const uRows = rows.filter((r) => r.unitId === uid)
       const gross = uRows.reduce((s, r) => s + r.grossRate, 0)
       const miles = uRows.reduce((s, r) => s + r.miles, 0)
-      if (metric === 'gross') point[String(uid)] = gross
-      else if (metric === 'rpm') point[String(uid)] = rpm(gross, miles)
-      else if (metric === 'miles') point[String(uid)] = miles
-      else point[String(uid)] = uRows.length
+      switch (metric) {
+        case 'gross':
+          point[String(uid)] = gross
+          break
+        case 'rpm':
+          point[String(uid)] = rpm(gross, miles)
+          break
+        case 'miles':
+          point[String(uid)] = miles
+          break
+        case 'loads':
+          point[String(uid)] = uRows.length
+          break
+        case 'avgLoadRate':
+          point[String(uid)] = uRows.length > 0 ? gross / uRows.length : 0
+          break
+        case 'pctGross':
+          point[String(uid)] = weekGross > 1e-9 ? (100 * gross) / weekGross : 0
+          break
+      }
     }
     return point
   })

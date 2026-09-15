@@ -12,7 +12,9 @@ export const RANGE_PRESETS: RangePreset[] = [
   { value: 'full', label: 'Full season' },
   { value: 'last1', label: 'Last week', weeks: 1 },
   { value: 'last2', label: 'Last 2 weeks', weeks: 2 },
+  { value: 'last3', label: 'Last 3 weeks', weeks: 3 },
   { value: 'last4', label: 'Last 4 weeks', weeks: 4 },
+  { value: 'last5', label: 'Last 5 weeks', weeks: 5 },
 ]
 
 export function useWeekRange(min: number, max: number) {

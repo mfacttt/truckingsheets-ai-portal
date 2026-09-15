@@ -1,16 +1,22 @@
 import { useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { deskColor, weeklyByUnit } from '@/entities/dashboard/lib/aggregate'
+import {
+  deskColor,
+  weeklyByUnit,
+  UNIT_WEEKLY_METRIC_LABELS,
+  type UnitWeeklyMetric,
+} from '@/entities/dashboard/lib/aggregate'
 import type { Load } from '@/entities/dashboard/model/types'
-import { formatMoneyCompact, formatNumber, formatRpm } from '@/shared/lib/format/number'
+import { formatMoneyCompact, formatNumber, formatRpm, formatShare } from '@/shared/lib/format/number'
 import '../../momentum-chart/ui/momentum-chart.css'
 
-type Metric = 'gross' | 'rpm' | 'miles' | 'loads'
-const METRIC_LABELS: Record<Metric, string> = { gross: 'Σ gross', rpm: 'RPM', miles: 'Σ miles', loads: 'Loads' }
+type Metric = UnitWeeklyMetric
+const METRIC_LABELS = UNIT_WEEKLY_METRIC_LABELS
 
 function fmt(metric: Metric, v: number): string {
   if (metric === 'rpm') return formatRpm(v)
-  if (metric === 'gross') return formatMoneyCompact(v)
+  if (metric === 'gross' || metric === 'avgLoadRate') return formatMoneyCompact(v)
+  if (metric === 'pctGross') return formatShare(v)
   return formatNumber(Math.round(v))
 }
 
