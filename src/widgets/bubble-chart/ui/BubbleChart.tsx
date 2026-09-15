@@ -147,11 +147,15 @@ export function BubbleChart({
             {data.map((d) => (
               <Cell key={d.name} fill={colorOf(d.name, d._i)} stroke="var(--card)" strokeWidth={1} />
             ))}
+            {/* fill has to be the attribute, not a style: recharts writes the series
+                colour onto the label as an attribute, and a style object loses to it. */}
             <LabelList
               dataKey="name"
               position="top"
-              offset={10}
-              style={{ fill: 'var(--ink)', fontSize: 10.5, fontWeight: 600 }}
+              offset={12}
+              fill="var(--ink)"
+              fontSize={10.5}
+              fontWeight={600}
             />
           </Scatter>
         </ScatterChart>
