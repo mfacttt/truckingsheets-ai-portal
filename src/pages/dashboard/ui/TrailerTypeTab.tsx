@@ -20,7 +20,7 @@ import { UnitWeeklyHistogram } from '@/widgets/unit-weekly-histogram/ui/UnitWeek
 import { BubbleChart } from '@/widgets/bubble-chart/ui/BubbleChart'
 import { DonutBar } from '@/widgets/donut-bar/ui/DonutBar'
 import { Checklist } from '@/widgets/premium-table/ui/Checklist'
-import { formatMoney } from '@/shared/lib/format/number'
+import { formatMiles, formatMoney, formatRpm } from '@/shared/lib/format/number'
 
 /** The shared Metric drives the ranking of every table on the board, so the same
  *  pick means the same ordering whichever slice the reader is looking at. */
@@ -104,6 +104,35 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
     display: formatMoney(f.gross),
   }))
 
+  // Each metric is its own slice set, so switching re-measures the mix rather
+  // than re-scaling the same one.
+  const mixMetrics = useMemo(
+    () => [
+      { value: 'gross', label: 'Gross', data: donutData },
+      {
+        value: 'rpm',
+        label: 'RPM',
+        data: families.map((f) => ({
+          name: f.family,
+          value: f.rpm,
+          color: familyColor(f.family),
+          display: formatRpm(f.rpm),
+        })),
+      },
+      {
+        value: 'miles',
+        label: 'Miles',
+        data: families.map((f) => ({
+          name: f.family,
+          value: f.miles,
+          color: familyColor(f.family),
+          display: formatMiles(f.miles),
+        })),
+      },
+    ],
+    [families, donutData],
+  )
+
   const unitMixData = useMemo(
     () =>
       units.slice(0, 12).map((u, i) => ({
@@ -140,8 +169,10 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
             <FamilyShareTable rows={families} weekCount={ledger.length} extraControls={filterBar} />
             <DonutBar
               title="Mix · Σ gross share by trailer family"
-              caption="Donut + benchmark bar · same window"
+              caption="Donut + benchmark bar · pick one family to weigh it against the rest"
               data={donutData}
+              metrics={mixMetrics}
+              focusOptions={families.map((f) => f.family)}
             />
             <BubbleChart
               title="Trailer family snapshot"

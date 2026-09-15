@@ -560,14 +560,29 @@ export function heatColor(v: number, min: number, max: number, palette: HeatPale
   return t < 0.5 ? mix(c0, c1, t * 2) : mix(c1, c2, (t - 0.5) * 2)
 }
 
-/** Readable text colour (dark or light) for a given `rgb(r, g, b)` background. */
+const HEAT_TEXT_DARK = '#1B2233'
+const HEAT_TEXT_LIGHT = '#FFFFFF'
+
+function relativeLuminance(r: number, g: number, b: number): number {
+  const channel = (v: number) => {
+    const c = v / 255
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  }
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+}
+
+function contrastRatio(a: number, b: number): number {
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+}
+
+/** Readable text colour for a given `rgb(r, g, b)` heat fill. Picks whichever of the
+ *  two candidates actually contrasts more: a single luminance threshold mislabels the
+ *  mid-tones of these palettes, where white sinks into the fill. */
 export function heatTextColor(bg: string): string {
   const m = /rgb\((\d+),\s*(\d+),\s*(\d+)\)/.exec(bg)
-  if (!m) return '#fff'
-  const r = Number(m[1]) / 255
-  const g = Number(m[2]) / 255
-  const b = Number(m[3]) / 255
-  // perceived luminance
-  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
-  return lum > 0.62 ? '#1B2233' : '#fff'
+  if (!m) return HEAT_TEXT_LIGHT
+  const bgLum = relativeLuminance(Number(m[1]), Number(m[2]), Number(m[3]))
+  const onDark = contrastRatio(relativeLuminance(0x1b, 0x22, 0x33), bgLum)
+  const onLight = contrastRatio(1, bgLum)
+  return onDark > onLight ? HEAT_TEXT_DARK : HEAT_TEXT_LIGHT
 }
