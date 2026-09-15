@@ -240,19 +240,35 @@ table.ptable tbody tr:hover td:first-child { box-shadow: -3px 0 0 var(--sun); }
 .dchecklist input { width: 14px; height: 14px; accent-color: var(--sun); }
 
 /* premium sortable table (cohort / ledger / desk) */
-/* The list opens alongside the count, not under it: stacking it grew the row
-   taller and shoved every other row down the page. */
-.unit-count-cell { display: flex; align-items: baseline; gap: 10px; justify-content: flex-end; }
-.unit-count-head { display: inline-flex; align-items: center; gap: 7px; }
+/* The cell stays the width of its count. Spelling the list out inline widened the
+   column enough to push the rest of the table under a horizontal scrollbar. */
+.unit-count-cell { display: flex; justify-content: flex-end; }
 .unit-count-toggle {
+  display: inline-flex; align-items: center; gap: 6px; padding: 2px 7px;
   border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer;
-  width: 18px; height: 18px; border-radius: 5px; display: grid; place-items: center;
-  font-size: 8px; line-height: 1; padding: 0; transition: border-color .15s, color .15s;
+  border-radius: 7px; font: inherit; line-height: 1.4; transition: border-color .15s, color .15s;
 }
 .unit-count-toggle:hover { border-color: var(--sun-mist); color: var(--sun-deep); }
+.unit-count-toggle:focus-visible { outline: 2px solid var(--sun); outline-offset: 1px; }
 .unit-count-n { font-weight: 700; font-variant-numeric: tabular-nums; }
+.unit-count-caret { font-size: 7px; opacity: .65; }
 .unit-count-single { font-weight: 600; }
-.unit-count-list { font-size: 11.5px; color: var(--ink-3); line-height: 1.5; white-space: nowrap; }
+
+/* Portalled to the body: the table scroll container would clip it otherwise. */
+.unit-count-pop {
+  position: fixed; z-index: 60; background: var(--card); border: 1px solid var(--line);
+  border-radius: 12px; box-shadow: var(--shadow-lg); padding: 10px 12px;
+  max-width: 320px; max-height: 280px; overflow-y: auto;
+}
+.unit-count-pop-head {
+  font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 7px;
+}
+.unit-count-pop-list { display: flex; flex-wrap: wrap; gap: 5px 8px; list-style: none; margin: 0; padding: 0; }
+.unit-count-pop-list li {
+  font-size: 12px; color: var(--ink-2); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; white-space: nowrap;
+}
 
 /* Vertical scroll lives here too, so the sticky header has a scroll container to
    stick against — with overflow-x alone the head scrolls away with the page. */
