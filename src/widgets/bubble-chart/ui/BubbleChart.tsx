@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   CartesianGrid,
   LabelList,
@@ -19,9 +19,6 @@ import {
 import { formatMoney, formatMoneyCompact, formatNumber, formatRpm, formatShare } from '@/shared/lib/format/number'
 
 const METRICS = Object.keys(BUBBLE_METRIC_LABELS) as BubbleMetric[]
-
-/** How many of the biggest dots get a name printed next to them. */
-const LABELLED_POINTS = 5
 
 function fmt(metric: BubbleMetric, v: number): string {
   if (metric === 'rpm') return formatRpm(v)
@@ -57,16 +54,47 @@ export function BubbleChart({
   const [x, setX] = useState<BubbleMetric>(defaultX)
   const [y, setY] = useState<BubbleMetric>(defaultY)
   const [z, setZ] = useState<BubbleMetric>(defaultZ)
+  const [hidden, setHidden] = useState<Set<string>>(new Set())
+  const [pickOpen, setPickOpen] = useState(false)
+  const pick = useRef<HTMLDivElement>(null)
 
-  const data = useMemo(() => {
-    const rows = points.map((p, i) => ({ ...p, _x: p[x], _y: p[y], _z: Math.max(p[z], 0.0001), _i: i }))
-    // Small dots cluster near the origin, where their names pile onto each other
-    // and onto the dots themselves. Only the leaders carry a label; the rest are
-    // still named on hover.
-    const ranked = [...rows].sort((a, b) => b._z - a._z).slice(0, LABELLED_POINTS)
-    const labelled = new Set(ranked.map((r) => r.name))
-    return rows.map((r) => ({ ...r, _label: labelled.has(r.name) ? r.name : '' }))
-  }, [points, x, y, z])
+  useEffect(() => {
+    if (!pickOpen) return
+    function onDown(e: PointerEvent) {
+      if (!pick.current?.contains(e.target as Node)) setPickOpen(false)
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setPickOpen(false)
+    }
+    document.addEventListener('pointerdown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('pointerdown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [pickOpen])
+
+  const names = useMemo(() => points.map((p) => p.name), [points])
+  const shownNames = useMemo(() => names.filter((n) => !hidden.has(n)), [names, hidden])
+
+  // Every plotted dot carries its name. Dropping the crowd through the picker is
+  // what keeps the labels from piling onto each other near the origin.
+  const data = useMemo(
+    () =>
+      points
+        .map((p, i) => ({ ...p, _x: p[x], _y: p[y], _z: Math.max(p[z], 0.0001), _i: i, _label: p.name }))
+        .filter((p) => !hidden.has(p.name)),
+    [points, x, y, z, hidden],
+  )
+
+  function toggle(name: string) {
+    setHidden((prev) => {
+      const next = new Set(prev)
+      if (next.has(name)) next.delete(name)
+      else next.add(name)
+      return next
+    })
+  }
 
   return (
     <div className="dcard">
@@ -103,6 +131,39 @@ export function BubbleChart({
               ))}
             </select>
           </div>
+          <div className="dfield bubble-pick" ref={pick}>
+            <label>Show</label>
+            <button
+              type="button"
+              className="dselect bubble-pick-btn"
+              aria-expanded={pickOpen}
+              onClick={() => setPickOpen((v) => !v)}
+            >
+              {shownNames.length === names.length ? `All ${names.length}` : `${shownNames.length} of ${names.length}`}
+              <span className="bubble-pick-caret">{pickOpen ? '▲' : '▼'}</span>
+            </button>
+            {pickOpen && (
+              <div className="bubble-pick-pop">
+                <div className="dchecklist-head">
+                  <button type="button" className="linklike" onClick={() => setHidden(new Set())}>
+                    All
+                  </button>
+                  <button type="button" className="linklike" onClick={() => setHidden(new Set(names))}>
+                    None
+                  </button>
+                </div>
+                <div className="bubble-pick-list">
+                  {names.map((n, i) => (
+                    <label key={n}>
+                      <input type="checkbox" checked={!hidden.has(n)} onChange={() => toggle(n)} />
+                      <i style={{ background: colorOf(n, i) }} />
+                      {n}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -112,7 +173,10 @@ export function BubbleChart({
       </p>
 
       <ResponsiveContainer width="100%" height={340}>
-        <ScatterChart margin={{ top: 12, right: 20, bottom: 22, left: 8 }}>
+        {/* The top margin carries the labels: a leader's dot reaches the top of the
+            scale, its name sits 18px above that, and the text is another 11px tall.
+            Anything tighter clipped the topmost names against the edge of the plot. */}
+        <ScatterChart margin={{ top: 54, right: 20, bottom: 22, left: 8 }}>
           <CartesianGrid stroke="var(--line)" strokeDasharray="3 3" />
           <XAxis
             type="number"
