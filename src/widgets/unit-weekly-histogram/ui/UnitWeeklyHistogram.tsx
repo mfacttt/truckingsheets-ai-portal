@@ -51,6 +51,15 @@ export function UnitWeeklyHistogram({ loads, unitIds }: { loads: Load[]; unitIds
         </div>
       </div>
 
+      <div className="chart-legend">
+        {shown.map((u, i) => (
+          <span key={u}>
+            <i style={{ background: deskColor(i) }} />
+            Unit {u}
+          </span>
+        ))}
+      </div>
+
       <ResponsiveContainer width="100%" height={280}>
         {showLines ? (
           <LineChart data={data} margin={{ top: 6, right: 8, bottom: 6, left: 0 }}>

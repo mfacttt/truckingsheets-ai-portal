@@ -7,6 +7,7 @@ import {
   type FamilyWeeklyMetric,
 } from '@/entities/dashboard/lib/aggregate'
 import type { Load } from '@/entities/dashboard/model/types'
+import { weekLabelWithDates } from '@/entities/dashboard/lib/week-dates'
 import { formatMoneyCompact, formatNumber, formatRpm, formatShare } from '@/shared/lib/format/number'
 import '../../momentum-chart/ui/momentum-chart.css'
 
@@ -72,6 +73,15 @@ export function FamilyWeeklyHistogram({
         </div>
       </div>
 
+      <div className="chart-legend">
+        {shown.map((fam) => (
+          <span key={fam}>
+            <i style={{ background: familyColor(fam) }} />
+            {fam}
+          </span>
+        ))}
+      </div>
+
       <ResponsiveContainer width="100%" height={280}>
         {showLines ? (
           <LineChart data={data} margin={{ top: 6, right: 8, bottom: 6, left: 0 }}>
@@ -90,7 +100,7 @@ export function FamilyWeeklyHistogram({
             <YAxis tickFormatter={(v) => formatMetric(metric, v)} tick={{ fontSize: 11, fill: 'var(--ink-3)' }} axisLine={false} tickLine={false} width={64} />
             <Tooltip content={<HistTooltip families={shown} metric={metric} />} />
             {shown.map((fam) => (
-              <Bar key={fam} dataKey={fam} stackId="fam" fill={familyColor(fam)} />
+              <Bar key={fam} dataKey={fam} fill={familyColor(fam)} />
             ))}
           </BarChart>
         )}
@@ -115,7 +125,7 @@ function HistTooltip({
   if (!active || !payload?.length) return null
   return (
     <div className="chart-tooltip">
-      <div className="chart-tooltip-week">Week {label}</div>
+      <div className="chart-tooltip-week">{weekLabelWithDates(Number(label))}</div>
       {families.map((fam, i) => (
         <div className="chart-tooltip-row" key={fam}>
           <span className="chart-tooltip-dot" style={{ background: familyColor(fam) }} />
