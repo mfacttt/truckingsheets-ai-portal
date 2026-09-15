@@ -22,6 +22,7 @@ import { DonutBar } from '@/widgets/donut-bar/ui/DonutBar'
 import { RpmRankTables } from '@/widgets/rpm-rank-tables/ui/RpmRankTables'
 import { DeskWeekModal } from '@/widgets/desk-week-modal/ui/DeskWeekModal'
 import { Checklist } from '@/widgets/premium-table/ui/Checklist'
+import { UnitFilterPopover } from '@/widgets/premium-table/ui/UnitFilterPopover'
 import { CountExpandCell } from '@/widgets/premium-table/ui/CountExpandCell'
 import { PremiumTable, type PremiumColumn } from '@/widgets/premium-table/ui/PremiumTable'
 import { formatMoney, formatMiles, formatNumber, formatRpm } from '@/shared/lib/format/number'
@@ -152,10 +153,13 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
   )
 
   const unitFilterToggle = (
-    <label className="dcheck">
-      <input type="checkbox" checked={unitFilterOn} onChange={(e) => setUnitFilterOn(e.target.checked)} />
-      Filter by units
-    </label>
+    <UnitFilterPopover
+      on={unitFilterOn}
+      onToggle={setUnitFilterOn}
+      options={allUnitIds}
+      selected={unitSel}
+      onChange={setUnitSel}
+    />
   )
 
   const filterBar = (
@@ -293,11 +297,6 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
                 </>
               }
             />
-            {unitFilterOn && (
-              <div className="dcontrols" style={{ marginBottom: 16 }}>
-                <Checklist label="Units" options={allUnitIds} selected={unitSel} onChange={setUnitSel} render={(u) => `Unit ${u}`} />
-              </div>
-            )}
             <BubbleChart
               title="Desk × units"
               points={deskBubbles}
@@ -366,11 +365,6 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
                 </>
               }
             />
-            {unitFilterOn && (
-              <div className="dcontrols" style={{ marginBottom: 16 }}>
-                <Checklist label="Units" options={allUnitIds} selected={unitSel} onChange={setUnitSel} render={(u) => `Unit ${u}`} />
-              </div>
-            )}
             <BubbleChart
               title="Units snapshot"
               points={unitBubbles}

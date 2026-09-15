@@ -19,7 +19,7 @@ import { FamilyWeeklyHistogram } from '@/widgets/family-weekly-histogram/ui/Fami
 import { UnitWeeklyHistogram } from '@/widgets/unit-weekly-histogram/ui/UnitWeeklyHistogram'
 import { BubbleChart } from '@/widgets/bubble-chart/ui/BubbleChart'
 import { DonutBar } from '@/widgets/donut-bar/ui/DonutBar'
-import { Checklist } from '@/widgets/premium-table/ui/Checklist'
+import { UnitFilterPopover } from '@/widgets/premium-table/ui/UnitFilterPopover'
 import { formatMiles, formatMoney, formatRpm } from '@/shared/lib/format/number'
 
 /** The shared Metric drives the ranking of every table on the board, so the same
@@ -197,18 +197,16 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
               extraControls={
                 <>
                   {filterBar}
-                  <label className="dcheck">
-                    <input type="checkbox" checked={unitFilterOn} onChange={(e) => setUnitFilterOn(e.target.checked)} />
-                    Filter by units
-                  </label>
+                  <UnitFilterPopover
+                    on={unitFilterOn}
+                    onToggle={setUnitFilterOn}
+                    options={allUnits}
+                    selected={unitSel}
+                    onChange={setUnitSel}
+                  />
                 </>
               }
             />
-            {unitFilterOn && (
-              <div className="dcontrols" style={{ marginBottom: 16 }}>
-                <Checklist label="Units" options={allUnits} selected={unitSel} onChange={setUnitSel} render={(u) => `Unit ${u}`} />
-              </div>
-            )}
             <DonutBar
               title="Unit mix · Σ gross share"
               caption="Top 12 units · donut + benchmark bar"

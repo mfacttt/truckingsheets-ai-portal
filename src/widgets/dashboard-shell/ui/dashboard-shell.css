@@ -219,6 +219,20 @@ table.ptable tbody tr:hover td:first-child { box-shadow: -3px 0 0 var(--sun); }
   border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
   max-height: 168px; overflow-y: auto; padding: 8px; min-width: 190px;
 }
+
+/* The picker floats out of its own checkbox. In flow it rendered after the table,
+   a screenful away from the control that opened it. */
+.unit-filter { position: relative; display: inline-flex; align-items: flex-end; }
+.unit-filter-count {
+  font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--sun-deep);
+  background: var(--sun-soft); border: 1px solid var(--sun-mist); border-radius: 999px; padding: 1px 6px;
+}
+.unit-filter-pop {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 30;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px; box-shadow: var(--shadow-lg);
+}
+.unit-filter-pop .dchecklist { border: 0; background: none; padding: 0; max-height: 240px; min-width: 200px; }
 .dchecklist-head { display: flex; gap: 8px; margin-bottom: 6px; }
 .dchecklist-head button { font-size: 11px; }
 .dchecklist label { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-2); padding: 4px 6px; border-radius: 6px; cursor: pointer; }
@@ -226,7 +240,9 @@ table.ptable tbody tr:hover td:first-child { box-shadow: -3px 0 0 var(--sun); }
 .dchecklist input { width: 14px; height: 14px; accent-color: var(--sun); }
 
 /* premium sortable table (cohort / ledger / desk) */
-.unit-count-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+/* The list opens alongside the count, not under it: stacking it grew the row
+   taller and shoved every other row down the page. */
+.unit-count-cell { display: flex; align-items: baseline; gap: 10px; justify-content: flex-end; }
 .unit-count-head { display: inline-flex; align-items: center; gap: 7px; }
 .unit-count-toggle {
   border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer;
@@ -236,7 +252,7 @@ table.ptable tbody tr:hover td:first-child { box-shadow: -3px 0 0 var(--sun); }
 .unit-count-toggle:hover { border-color: var(--sun-mist); color: var(--sun-deep); }
 .unit-count-n { font-weight: 700; font-variant-numeric: tabular-nums; }
 .unit-count-single { font-weight: 600; }
-.unit-count-list { font-size: 11.5px; color: var(--ink-3); line-height: 1.5; max-width: 260px; }
+.unit-count-list { font-size: 11.5px; color: var(--ink-3); line-height: 1.5; white-space: nowrap; }
 
 /* Vertical scroll lives here too, so the sticky header has a scroll container to
    stick against — with overflow-x alone the head scrolls away with the page. */
