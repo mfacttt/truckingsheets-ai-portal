@@ -222,7 +222,7 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
               defaultY="gross"
               defaultZ="gross"
             />
-            <UnitWeeklyHistogram loads={unitScoped} unitIds={allUnitRows.map((u) => u.unitId)} />
+            <UnitWeeklyHistogram loads={unitScoped} unitIds={units.map((u) => u.unitId)} />
           </>
         )}
       </div>

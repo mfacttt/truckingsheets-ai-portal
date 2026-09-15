@@ -7,6 +7,7 @@ import {
   type UnitWeeklyMetric,
 } from '@/entities/dashboard/lib/aggregate'
 import type { Load } from '@/entities/dashboard/model/types'
+import { weekLabelWithDates } from '@/entities/dashboard/lib/week-dates'
 import { formatMoneyCompact, formatNumber, formatRpm, formatShare } from '@/shared/lib/format/number'
 import '../../momentum-chart/ui/momentum-chart.css'
 
@@ -23,16 +24,31 @@ function fmt(metric: Metric, v: number): string {
 export function UnitWeeklyHistogram({ loads, unitIds }: { loads: Load[]; unitIds: number[] }) {
   const [metric, setMetric] = useState<Metric>('gross')
   const [showLines, setShowLines] = useState(false)
+  const [hidden, setHidden] = useState<Set<number>>(new Set())
 
-  const shown = useMemo(() => unitIds.slice(0, 12), [unitIds])
+  const series = useMemo(() => unitIds.slice(0, 12), [unitIds])
+  // Twelve units side by side on a full season leaves each bar about a pixel wide,
+  // so the key doubles as the filter for which ones actually get drawn.
+  const shown = useMemo(() => series.filter((u) => !hidden.has(u)), [series, hidden])
   const data = useMemo(() => weeklyByUnit(loads, shown, metric), [loads, shown, metric])
+
+  function toggle(unit: number) {
+    setHidden((prev) => {
+      const next = new Set(prev)
+      if (next.has(unit)) next.delete(unit)
+      else next.add(unit)
+      return next
+    })
+  }
 
   return (
     <div className="dcard">
       <div className="chart-card-head">
         <div className="chart-card-title">
           <h2>Weekly {METRIC_LABELS[metric]} by unit</h2>
-          <p>Top {shown.length} units by Σ gross · one series each</p>
+          <p>
+            {shown.length} of {series.length} units · click the key to add or drop a series
+          </p>
         </div>
         <div className="chart-metric-controls">
           <div className="chart-metric-field">
@@ -52,12 +68,29 @@ export function UnitWeeklyHistogram({ loads, unitIds }: { loads: Load[]; unitIds
       </div>
 
       <div className="chart-legend">
-        {shown.map((u, i) => (
-          <span key={u}>
+        {series.map((u, i) => (
+          <button
+            key={u}
+            type="button"
+            className={hidden.has(u) ? 'is-off' : undefined}
+            onClick={() => toggle(u)}
+            aria-pressed={!hidden.has(u)}
+            title={hidden.has(u) ? `Show unit ${u}` : `Hide unit ${u}`}
+          >
             <i style={{ background: deskColor(i) }} />
             Unit {u}
-          </span>
+          </button>
         ))}
+        {series.length > 1 && (
+          <span className="chart-legend-actions">
+            <button type="button" onClick={() => setHidden(new Set())}>
+              All
+            </button>
+            <button type="button" onClick={() => setHidden(new Set(series.slice(5)))}>
+              Top 5
+            </button>
+          </span>
+        )}
       </div>
 
       <ResponsiveContainer width="100%" height={280}>
@@ -67,8 +100,8 @@ export function UnitWeeklyHistogram({ loads, unitIds }: { loads: Load[]; unitIds
             <XAxis dataKey="week" tickFormatter={(w) => `W${w}`} tick={{ fontSize: 11, fill: 'var(--ink-3)' }} axisLine={{ stroke: 'var(--line)' }} tickLine={false} />
             <YAxis tickFormatter={(v) => fmt(metric, v)} tick={{ fontSize: 11, fill: 'var(--ink-3)' }} axisLine={false} tickLine={false} width={64} />
             <Tooltip content={<UnitTip unitIds={shown} metric={metric} />} />
-            {shown.map((u, i) => (
-              <Line key={u} type="monotone" dataKey={String(u)} stroke={deskColor(i)} strokeWidth={2} dot={false} />
+            {shown.map((u) => (
+              <Line key={u} type="monotone" dataKey={String(u)} stroke={deskColor(series.indexOf(u))} strokeWidth={2} dot={false} />
             ))}
           </LineChart>
         ) : (
@@ -77,8 +110,8 @@ export function UnitWeeklyHistogram({ loads, unitIds }: { loads: Load[]; unitIds
             <XAxis dataKey="week" tickFormatter={(w) => `W${w}`} tick={{ fontSize: 11, fill: 'var(--ink-3)' }} axisLine={{ stroke: 'var(--line)' }} tickLine={false} />
             <YAxis tickFormatter={(v) => fmt(metric, v)} tick={{ fontSize: 11, fill: 'var(--ink-3)' }} axisLine={false} tickLine={false} width={64} />
             <Tooltip content={<UnitTip unitIds={shown} metric={metric} />} />
-            {shown.map((u, i) => (
-              <Bar key={u} dataKey={String(u)} fill={deskColor(i)} />
+            {shown.map((u) => (
+              <Bar key={u} dataKey={String(u)} fill={deskColor(series.indexOf(u))} />
             ))}
           </BarChart>
         )}
@@ -103,7 +136,7 @@ function UnitTip({
   if (!active || !payload?.length) return null
   return (
     <div className="chart-tooltip">
-      <div className="chart-tooltip-week">Week {label}</div>
+      <div className="chart-tooltip-week">{weekLabelWithDates(Number(label))}</div>
       {unitIds.map((u, i) => (
         <div className="chart-tooltip-row" key={u}>
           <span className="chart-tooltip-dot" style={{ background: deskColor(i) }} />

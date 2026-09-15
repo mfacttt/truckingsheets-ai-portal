@@ -33,18 +33,34 @@ export function FamilyWeeklyHistogram({
   const [metric, setMetric] = useState<Metric>('gross')
   const [showLines, setShowLines] = useState(false)
   const [compareAll, setCompareAll] = useState(false)
+  const [hidden, setHidden] = useState<Set<string>>(new Set())
 
   const options = allFamilies ?? families
   // With a single family picked the chart collapses to one series, which reads as a
   // lone column; "Compare all" puts the other families back alongside it.
-  const shown = compareAll ? options : families
+  const series = compareAll ? options : families
+  // Grouped bars thin out to a couple of pixels once every family is on at once,
+  // so the key doubles as the filter for which ones actually get drawn.
+  const shown = useMemo(() => series.filter((f) => !hidden.has(f)), [series, hidden])
   const data = useMemo(() => weeklyByFamily(loads, shown, metric), [loads, shown, metric])
+
+  function toggle(fam: string) {
+    setHidden((prev) => {
+      const next = new Set(prev)
+      if (next.has(fam)) next.delete(fam)
+      else next.add(fam)
+      return next
+    })
+  }
 
   return (
     <div className="dcard">
       <div className="chart-card-head">
         <div className="chart-card-title">
           <h2>Weekly Σ gross by trailer family — histogram</h2>
+          <p>
+            {shown.length} of {series.length} families · click the key to add or drop a series
+          </p>
         </div>
         <div className="chart-metric-controls">
           <div className="chart-metric-field">
@@ -74,12 +90,29 @@ export function FamilyWeeklyHistogram({
       </div>
 
       <div className="chart-legend">
-        {shown.map((fam) => (
-          <span key={fam}>
+        {series.map((fam) => (
+          <button
+            key={fam}
+            type="button"
+            className={hidden.has(fam) ? 'is-off' : undefined}
+            onClick={() => toggle(fam)}
+            aria-pressed={!hidden.has(fam)}
+            title={hidden.has(fam) ? `Show ${fam}` : `Hide ${fam}`}
+          >
             <i style={{ background: familyColor(fam) }} />
             {fam}
-          </span>
+          </button>
         ))}
+        {series.length > 1 && (
+          <span className="chart-legend-actions">
+            <button type="button" onClick={() => setHidden(new Set())}>
+              All
+            </button>
+            <button type="button" onClick={() => setHidden(new Set(series.slice(1)))}>
+              Only top
+            </button>
+          </span>
+        )}
       </div>
 
       <ResponsiveContainer width="100%" height={280}>
