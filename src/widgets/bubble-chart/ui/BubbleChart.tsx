@@ -20,6 +20,9 @@ import { formatMoney, formatMoneyCompact, formatNumber, formatRpm, formatShare }
 
 const METRICS = Object.keys(BUBBLE_METRIC_LABELS) as BubbleMetric[]
 
+/** How many of the biggest dots get a name printed next to them. */
+const LABELLED_POINTS = 5
+
 function fmt(metric: BubbleMetric, v: number): string {
   if (metric === 'rpm') return formatRpm(v)
   if (metric === 'gross' || metric === 'avgGrossWeek' || metric === 'avgLoadRate') return formatMoneyCompact(v)
@@ -55,10 +58,15 @@ export function BubbleChart({
   const [y, setY] = useState<BubbleMetric>(defaultY)
   const [z, setZ] = useState<BubbleMetric>(defaultZ)
 
-  const data = useMemo(
-    () => points.map((p, i) => ({ ...p, _x: p[x], _y: p[y], _z: Math.max(p[z], 0.0001), _i: i })),
-    [points, x, y, z],
-  )
+  const data = useMemo(() => {
+    const rows = points.map((p, i) => ({ ...p, _x: p[x], _y: p[y], _z: Math.max(p[z], 0.0001), _i: i }))
+    // Small dots cluster near the origin, where their names pile onto each other
+    // and onto the dots themselves. Only the leaders carry a label; the rest are
+    // still named on hover.
+    const ranked = [...rows].sort((a, b) => b._z - a._z).slice(0, LABELLED_POINTS)
+    const labelled = new Set(ranked.map((r) => r.name))
+    return rows.map((r) => ({ ...r, _label: labelled.has(r.name) ? r.name : '' }))
+  }, [points, x, y, z])
 
   return (
     <div className="dcard">
@@ -150,9 +158,9 @@ export function BubbleChart({
             {/* fill has to be the attribute, not a style: recharts writes the series
                 colour onto the label as an attribute, and a style object loses to it. */}
             <LabelList
-              dataKey="name"
+              dataKey="_label"
               position="top"
-              offset={12}
+              offset={18}
               fill="var(--ink)"
               fontSize={10.5}
               fontWeight={600}
