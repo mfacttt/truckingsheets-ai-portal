@@ -13,6 +13,8 @@ import {
 } from '@/entities/dashboard/lib/aggregate'
 import type { DeskUnitRow, UnitEconomicsRow } from '@/entities/dashboard/lib/aggregate'
 import type { Load } from '@/entities/dashboard/model/types'
+import { useDashFilters, type DashMetric } from '@/entities/dashboard/model/dash-filters'
+import { DashFilterBar } from '@/widgets/dash-filter-bar/ui/DashFilterBar'
 import { DispatcherTable } from '@/widgets/dispatcher-table/ui/DispatcherTable'
 import { DispatcherTrend } from '@/widgets/dispatcher-trend/ui/DispatcherTrend'
 import { BubbleChart } from '@/widgets/bubble-chart/ui/BubbleChart'
@@ -20,24 +22,11 @@ import { DonutBar } from '@/widgets/donut-bar/ui/DonutBar'
 import { RpmRankTables } from '@/widgets/rpm-rank-tables/ui/RpmRankTables'
 import { DeskWeekModal } from '@/widgets/desk-week-modal/ui/DeskWeekModal'
 import { Checklist } from '@/widgets/premium-table/ui/Checklist'
+import { CountExpandCell } from '@/widgets/premium-table/ui/CountExpandCell'
 import { PremiumTable, type PremiumColumn } from '@/widgets/premium-table/ui/PremiumTable'
 import { formatMoney, formatMiles, formatNumber, formatRpm } from '@/shared/lib/format/number'
 
-const TOP_N_OPTIONS = [10, 15, 20, 0] as const
-
-type DeskUnitMetric = 'gross' | 'avgGrossWk' | 'rpm' | 'miles' | 'avgGrossWeekUnit' | 'avgLoadRate' | 'loads'
-
-const DESK_UNIT_METRICS: { value: DeskUnitMetric; label: string }[] = [
-  { value: 'gross', label: 'Gross' },
-  { value: 'avgGrossWk', label: 'Avg $/wk' },
-  { value: 'rpm', label: 'RPM' },
-  { value: 'miles', label: 'Miles' },
-  { value: 'avgGrossWeekUnit', label: 'Avg $/wk · unit' },
-  { value: 'avgLoadRate', label: 'Avg load rate' },
-  { value: 'loads', label: 'Loads' },
-]
-
-const DESK_UNIT_METRIC_VALUE: Record<DeskUnitMetric, (r: DeskUnitRow) => number> = {
+const DESK_UNIT_METRIC_VALUE: Record<DashMetric, (r: DeskUnitRow) => number> = {
   gross: (r) => r.gross,
   avgGrossWk: (r) => r.avgGrossPerWeek,
   rpm: (r) => r.rpm,
@@ -54,33 +43,6 @@ const SUB_TABS: { value: SubTab; label: string }[] = [
   { value: 'deskunits', label: 'Dispatchers & units' },
   { value: 'units', label: 'Units' },
 ]
-
-/** Count + expandable list. A single entry shows as itself, matching the prod board. */
-function CountExpandCell({ items, noun }: { items: (string | number)[]; noun: string }) {
-  const [open, setOpen] = useState(false)
-  if (items.length === 0) return <span>–</span>
-  if (items.length === 1) return <span className="unit-count-single">{items[0]}</span>
-  return (
-    <div className="unit-count-cell">
-      <div className="unit-count-head">
-        <button
-          type="button"
-          className="unit-count-toggle"
-          aria-expanded={open}
-          aria-label={open ? `Hide ${noun}` : `Show ${noun}`}
-          title={open ? `Hide ${noun}` : `Show ${noun}`}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? '▼' : '▶'}
-        </button>
-        <span className="unit-count-n" title={`${items.length} ${noun}`}>
-          {items.length}
-        </span>
-      </div>
-      {open && <div className="unit-count-list">{items.join(', ')}</div>}
-    </div>
-  )
-}
 
 const DESK_UNIT_COLUMNS: PremiumColumn<DeskUnitRow>[] = [
   { key: 'desk', label: 'Dispatcher', render: (r) => r.desk, sortable: false },
@@ -127,14 +89,12 @@ const UNIT_COLUMNS: PremiumColumn<UnitEconomicsRow>[] = [
 
 export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(code: string): void }) {
   const [sub, setSub] = useState<SubTab>('overview')
-  const [topN, setTopN] = useState<number>(15)
-  const [familyFilter, setFamilyFilter] = useState('All')
   const [deskSel, setDeskSel] = useState<Set<string>>(new Set())
   const [deskFilterOn, setDeskFilterOn] = useState(false)
   const [unitSel, setUnitSel] = useState<Set<number>>(new Set())
   const [unitFilterOn, setUnitFilterOn] = useState(false)
-  const [metric, setMetric] = useState<DeskUnitMetric>('gross')
   const [modalFamily, setModalFamily] = useState<string | null>(null)
+  const { family, metric, topN } = useDashFilters()
 
   const ledger = weeklyLedger(loads)
   const weeks = ledger.length
@@ -142,10 +102,10 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
   const familyNames = families.map((f) => f.family)
 
   const scoped = useMemo(() => {
-    let out = familyFilter === 'All' ? loads : loads.filter((l) => l.family === familyFilter)
+    let out = family === 'All' ? loads : loads.filter((l) => l.family === family)
     if (deskFilterOn && deskSel.size > 0) out = out.filter((l) => deskSel.has(l.dispatcher))
     return out
-  }, [loads, familyFilter, deskFilterOn, deskSel])
+  }, [loads, family, deskFilterOn, deskSel])
 
   const allRows = dispatcherRows(scoped, weeks)
   const rows = topN > 0 ? allRows.slice(0, topN) : allRows
@@ -173,8 +133,9 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
     const ranked = [...all].sort((a, b) => DESK_UNIT_METRIC_VALUE[metric](b) - DESK_UNIT_METRIC_VALUE[metric](a))
     return topN > 0 ? ranked.slice(0, topN) : ranked
   }, [deskUnitScoped, weeks, metric, topN])
-  const unitRows = useMemo(() => unitEconomics(scoped, weeks), [scoped, weeks])
-  const unitBubbles = useMemo(() => bubbleByUnit(scoped, weeks), [scoped, weeks])
+  const allUnitRows = useMemo(() => unitEconomics(deskUnitScoped, weeks), [deskUnitScoped, weeks])
+  const unitRows = topN > 0 ? allUnitRows.slice(0, topN) : allUnitRows
+  const unitBubbles = useMemo(() => bubbleByUnit(deskUnitScoped, weeks), [deskUnitScoped, weeks])
 
   const donutData = rows.map((r, i) => ({
     name: r.desk,
@@ -183,76 +144,24 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
     display: formatMoney(r.gross),
   }))
 
-  const controls = (
-    <>
-      <div className="dfield">
-        <label>Family</label>
-        <select className="dselect" value={familyFilter} onChange={(e) => setFamilyFilter(e.target.value)} style={{ minWidth: 120 }}>
-          <option value="All">All</option>
-          {familyNames.map((f) => (
-            <option key={f} value={f}>{f}</option>
-          ))}
-        </select>
-      </div>
-      <div className="dfield">
-        <label>Top N</label>
-        <select className="dselect" value={topN} onChange={(e) => setTopN(Number(e.target.value))} style={{ minWidth: 90 }}>
-          {TOP_N_OPTIONS.map((n) => (
-            <option key={n} value={n}>{n === 0 ? 'All' : n}</option>
-          ))}
-        </select>
-      </div>
-      <label className="dcheck">
-        <input type="checkbox" checked={deskFilterOn} onChange={(e) => setDeskFilterOn(e.target.checked)} />
-        Filter by dispatcher
-      </label>
-    </>
+  const deskFilterToggle = (
+    <label className="dcheck">
+      <input type="checkbox" checked={deskFilterOn} onChange={(e) => setDeskFilterOn(e.target.checked)} />
+      Filter by dispatcher
+    </label>
   )
 
-  const familyControl = (
-    <div className="dfield">
-      <label>Family</label>
-      <select className="dselect" value={familyFilter} onChange={(e) => setFamilyFilter(e.target.value)} style={{ minWidth: 120 }}>
-        <option value="All">All</option>
-        {familyNames.map((f) => (
-          <option key={f} value={f}>{f}</option>
-        ))}
-      </select>
-    </div>
+  const unitFilterToggle = (
+    <label className="dcheck">
+      <input type="checkbox" checked={unitFilterOn} onChange={(e) => setUnitFilterOn(e.target.checked)} />
+      Filter by units
+    </label>
   )
 
-  const deskUnitControls = (
+  const filterBar = (
     <>
-      {familyControl}
-      <div className="dfield">
-        <label>Metric</label>
-        <select
-          className="dselect"
-          value={metric}
-          onChange={(e) => setMetric(e.target.value as DeskUnitMetric)}
-          style={{ minWidth: 150 }}
-        >
-          {DESK_UNIT_METRICS.map((m) => (
-            <option key={m.value} value={m.value}>{m.label}</option>
-          ))}
-        </select>
-      </div>
-      <div className="dfield">
-        <label>Top N</label>
-        <select className="dselect" value={topN} onChange={(e) => setTopN(Number(e.target.value))} style={{ minWidth: 90 }}>
-          {TOP_N_OPTIONS.map((n) => (
-            <option key={n} value={n}>{n === 0 ? 'All' : n}</option>
-          ))}
-        </select>
-      </div>
-      <label className="dcheck">
-        <input type="checkbox" checked={deskFilterOn} onChange={(e) => setDeskFilterOn(e.target.checked)} />
-        Filter by dispatcher
-      </label>
-      <label className="dcheck">
-        <input type="checkbox" checked={unitFilterOn} onChange={(e) => setUnitFilterOn(e.target.checked)} />
-        Filter by units
-      </label>
+      <DashFilterBar families={familyNames} />
+      {deskFilterToggle}
     </>
   )
 
@@ -300,19 +209,11 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               </div>
             </div>
 
-            <DispatcherTable rows={rows} extraControls={controls} onFormula={onFormula} />
+            <DispatcherTable rows={rows} extraControls={filterBar} onFormula={onFormula} />
             <DonutBar
               title="Desk Σ gross share"
               caption={`Top ${topN > 0 ? topN : 'all'} desks · donut + benchmark bar`}
               data={donutData}
-            />
-            <BubbleChart
-              title="Dispatcher snapshot"
-              points={deskBubbles}
-              colorOf={(_n, i) => deskColor(i)}
-              defaultX="loads"
-              defaultY="gross"
-              defaultZ="gross"
             />
             <DispatcherTrend loads={scoped} desks={topDeskNames} />
             <RpmRankTables best={best} worst={worst} />
@@ -340,14 +241,14 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
             <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
               <div className="kpi-card kpi-slate">
                 <div className="kpi-label">Active units</div>
-                <div className="kpi-value">{new Set(scoped.map((l) => l.unitId)).size}</div>
+                <div className="kpi-value">{new Set(deskUnitScoped.map((l) => l.unitId)).size}</div>
                 <div className="kpi-under">distinct units in slice</div>
               </div>
               <div className="kpi-card kpi-navy">
                 <div className="kpi-label">Avg units / dispatcher</div>
                 <div className="kpi-value">
-                  {allRows.length > 0
-                    ? (allRows.reduce((s, r) => s + r.activeUnits, 0) / allRows.length).toFixed(1)
+                  {dUnitRows.length > 0
+                    ? (dUnitRows.reduce((s, r) => s + r.unitCount, 0) / dUnitRows.length).toFixed(1)
                     : '–'}
                 </div>
                 <div className="kpi-under">mean desk fleet size</div>
@@ -356,8 +257,8 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
                 <div className="kpi-label">Loads per unit</div>
                 <div className="kpi-value">
                   {(() => {
-                    const u = new Set(scoped.map((l) => l.unitId)).size
-                    return u > 0 ? (scoped.length / u).toFixed(1) : '–'
+                    const u = new Set(deskUnitScoped.map((l) => l.unitId)).size
+                    return u > 0 ? (deskUnitScoped.length / u).toFixed(1) : '–'
                   })()}
                 </div>
                 <div className="kpi-under">Σ loads ÷ Σ units</div>
@@ -366,8 +267,8 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
                 <div className="kpi-label">Gross per unit</div>
                 <div className="kpi-value">
                   {(() => {
-                    const u = new Set(scoped.map((l) => l.unitId)).size
-                    const g = scoped.reduce((s, r) => s + r.grossRate, 0)
+                    const u = new Set(deskUnitScoped.map((l) => l.unitId)).size
+                    const g = deskUnitScoped.reduce((s, r) => s + r.grossRate, 0)
                     return u > 0 ? formatMoney(g / u) : '–'
                   })()}
                 </div>
@@ -385,7 +286,12 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               firstCol={(r) => <CountExpandCell items={r.units} noun="unit numbers" />}
               defaultSort="gross"
               minWidth={1020}
-              extraControls={deskUnitControls}
+              extraControls={
+                <>
+                  {filterBar}
+                  {unitFilterToggle}
+                </>
+              }
             />
             {unitFilterOn && (
               <div className="dcontrols" style={{ marginBottom: 16 }}>
@@ -408,14 +314,14 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
             <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
               <div className="kpi-card kpi-slate">
                 <div className="kpi-label">Active units</div>
-                <div className="kpi-value">{unitRows.length}</div>
+                <div className="kpi-value">{allUnitRows.length}</div>
                 <div className="kpi-under">rows in this slice</div>
               </div>
               <div className="kpi-card kpi-navy">
                 <div className="kpi-label">Avg desks / unit</div>
                 <div className="kpi-value">
-                  {unitRows.length > 0
-                    ? (unitRows.reduce((s, r) => s + r.dispatchers.length, 0) / unitRows.length).toFixed(1)
+                  {allUnitRows.length > 0
+                    ? (allUnitRows.reduce((s, r) => s + r.dispatchers.length, 0) / allUnitRows.length).toFixed(1)
                     : '–'}
                 </div>
                 <div className="kpi-under">mean dispatchers per truck</div>
@@ -423,8 +329,8 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               <div className="kpi-card kpi-cyan">
                 <div className="kpi-label">Loads per unit</div>
                 <div className="kpi-value">
-                  {unitRows.length > 0
-                    ? (unitRows.reduce((s, r) => s + r.loads, 0) / unitRows.length).toFixed(1)
+                  {allUnitRows.length > 0
+                    ? (allUnitRows.reduce((s, r) => s + r.loads, 0) / allUnitRows.length).toFixed(1)
                     : '–'}
                 </div>
                 <div className="kpi-under">mean loads per truck</div>
@@ -432,8 +338,8 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               <div className="kpi-card kpi-slate">
                 <div className="kpi-label">Gross per unit</div>
                 <div className="kpi-value">
-                  {unitRows.length > 0
-                    ? formatMoney(unitRows.reduce((s, r) => s + r.gross, 0) / unitRows.length)
+                  {allUnitRows.length > 0
+                    ? formatMoney(allUnitRows.reduce((s, r) => s + r.gross, 0) / allUnitRows.length)
                     : '–'}
                 </div>
                 <div className="kpi-under">mean Σ gross per truck</div>
@@ -441,7 +347,7 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
             </div>
 
             <p className="dash-subnav-hint" style={{ marginBottom: 12 }}>
-              One row per unit · Σ across every dispatcher who worked that truck.
+              One row per unit · the Dispatcher count shows who ran that truck in this window.
             </p>
             <PremiumTable
               title="Units table"
@@ -453,8 +359,18 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               firstCol={(r) => `Unit ${r.unitId}`}
               defaultSort="gross"
               minWidth={920}
-              extraControls={familyControl}
+              extraControls={
+                <>
+                  {filterBar}
+                  {unitFilterToggle}
+                </>
+              }
             />
+            {unitFilterOn && (
+              <div className="dcontrols" style={{ marginBottom: 16 }}>
+                <Checklist label="Units" options={allUnitIds} selected={unitSel} onChange={setUnitSel} render={(u) => `Unit ${u}`} />
+              </div>
+            )}
             <BubbleChart
               title="Units snapshot"
               points={unitBubbles}

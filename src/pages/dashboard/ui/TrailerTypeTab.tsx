@@ -2,12 +2,17 @@ import { useMemo, useState } from 'react'
 import {
   bubbleByFamily,
   bubbleByUnit,
+  deskColor,
   familyColor,
   familyShare,
   unitEconomics,
   weeklyLedger,
 } from '@/entities/dashboard/lib/aggregate'
 import type { Load } from '@/entities/dashboard/model/types'
+import { useDashFilters, type DashMetric } from '@/entities/dashboard/model/dash-filters'
+import type { UnitEconomicsRow } from '@/entities/dashboard/lib/aggregate'
+import type { FamilyShareRow } from '@/entities/dashboard/model/types'
+import { DashFilterBar } from '@/widgets/dash-filter-bar/ui/DashFilterBar'
 import { FamilyShareTable } from '@/widgets/family-table/ui/FamilyShareTable'
 import { UnitsEconomicsTable } from '@/widgets/family-table/ui/UnitsEconomicsTable'
 import { FamilyWeeklyHistogram } from '@/widgets/family-weekly-histogram/ui/FamilyWeeklyHistogram'
@@ -15,31 +20,60 @@ import { UnitWeeklyHistogram } from '@/widgets/unit-weekly-histogram/ui/UnitWeek
 import { BubbleChart } from '@/widgets/bubble-chart/ui/BubbleChart'
 import { DonutBar } from '@/widgets/donut-bar/ui/DonutBar'
 import { Checklist } from '@/widgets/premium-table/ui/Checklist'
-import { deskColor } from '@/entities/dashboard/lib/aggregate'
 import { formatMoney } from '@/shared/lib/format/number'
 
-type SubTab = 'overview' | 'units' | 'lines'
+/** The shared Metric drives the ranking of every table on the board, so the same
+ *  pick means the same ordering whichever slice the reader is looking at. */
+const UNIT_METRIC_VALUE: Record<DashMetric, (r: UnitEconomicsRow) => number> = {
+  gross: (r) => r.gross,
+  avgGrossWk: (r) => r.avgGrossPerWeekLedger,
+  rpm: (r) => r.rpm,
+  miles: (r) => r.miles,
+  avgGrossWeekUnit: (r) => r.avgGrossPerHaulingWeek,
+  avgLoadRate: (r) => r.avgLoadRate,
+  loads: (r) => r.loads,
+}
+
+const FAMILY_METRIC_VALUE: Record<DashMetric, (r: FamilyShareRow, weeks: number) => number> = {
+  gross: (r) => r.gross,
+  avgGrossWk: (r, w) => (w > 0 ? r.gross / w : 0),
+  rpm: (r) => r.rpm,
+  miles: (r) => r.miles,
+  avgGrossWeekUnit: (r, w) => (w > 0 && r.units > 0 ? r.gross / (w * r.units) : 0),
+  avgLoadRate: (r) => (r.loads > 0 ? r.gross / r.loads : 0),
+  loads: (r) => r.loads,
+}
+
+type SubTab = 'overview' | 'units'
 
 const SUB_TABS: { value: SubTab; label: string }[] = [
   { value: 'overview', label: 'Overview' },
   { value: 'units', label: 'Units & economics' },
-  { value: 'lines', label: 'Weekly lines' },
 ]
 
 export function TrailerTypeTab({ loads }: { loads: Load[] }) {
   const [sub, setSub] = useState<SubTab>('overview')
-  const [primary, setPrimary] = useState('All')
   const [unitSel, setUnitSel] = useState<Set<number>>(new Set())
   const [unitFilterOn, setUnitFilterOn] = useState(false)
+  const { family, metric, topN } = useDashFilters()
 
-  const families = familyShare(loads)
-  const familyNames = families.map((f) => f.family)
+  const allFamilies = familyShare(loads)
+  const familyNames = allFamilies.map((f) => f.family)
   const ledger = weeklyLedger(loads)
+  const ledgerWeeks = ledger.length
 
   const scopedLoads = useMemo(
-    () => (primary === 'All' ? loads : loads.filter((l) => l.family === primary)),
-    [loads, primary],
+    () => (family === 'All' ? loads : loads.filter((l) => l.family === family)),
+    [loads, family],
   )
+
+  // Tables and the donut follow the same Family pick as everything else on the board.
+  const families = useMemo(() => {
+    const rows = familyShare(scopedLoads)
+    return [...rows].sort(
+      (a, b) => FAMILY_METRIC_VALUE[metric](b, ledgerWeeks) - FAMILY_METRIC_VALUE[metric](a, ledgerWeeks),
+    )
+  }, [scopedLoads, metric, ledgerWeeks])
 
   const allUnits = useMemo(
     () => [...new Set(scopedLoads.map((l) => l.unitId))].sort((a, b) => a - b),
@@ -50,9 +84,18 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
     [scopedLoads, unitFilterOn, unitSel],
   )
 
-  const units = unitEconomics(unitScoped, ledger.length)
-  const famBubbles = useMemo(() => bubbleByFamily(loads, ledger.length), [loads, ledger.length])
+  const allUnitRows = useMemo(() => {
+    const rows = unitEconomics(unitScoped, ledgerWeeks)
+    return [...rows].sort((a, b) => UNIT_METRIC_VALUE[metric](b) - UNIT_METRIC_VALUE[metric](a))
+  }, [unitScoped, ledgerWeeks, metric])
+  const units = topN > 0 ? allUnitRows.slice(0, topN) : allUnitRows
+  const famBubbles = useMemo(() => bubbleByFamily(scopedLoads, ledger.length), [scopedLoads, ledger.length])
   const unitBubbles = useMemo(() => bubbleByUnit(unitScoped, ledger.length), [unitScoped, ledger.length])
+
+  // Histograms stay readable on a single-family pick by keeping every family in the
+  // series list — narrowing to one series is what made them show a lone column.
+  const histogramFamilies = family === 'All' ? familyNames : [family]
+  const histogramLoads = family === 'All' ? loads : scopedLoads
 
   const donutData = families.map((f) => ({
     name: f.family,
@@ -72,6 +115,8 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
     [units],
   )
 
+  const filterBar = <DashFilterBar families={familyNames} />
+
   return (
     <>
       <div className="dcard-inline-controls">
@@ -87,21 +132,12 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
             </button>
           ))}
         </div>
-        <div className="dfield" style={{ marginLeft: 'auto' }}>
-          <label>Primary selection</label>
-          <select className="dselect" value={primary} onChange={(e) => setPrimary(e.target.value)} style={{ minWidth: 140 }}>
-            <option value="All">All families</option>
-            {familyNames.map((f) => (
-              <option key={f} value={f}>{f}</option>
-            ))}
-          </select>
-        </div>
       </div>
 
       <div className="subtab-fade" key={sub}>
         {sub === 'overview' && (
           <>
-            <FamilyShareTable rows={families} weekCount={ledger.length} />
+            <FamilyShareTable rows={families} weekCount={ledger.length} extraControls={filterBar} />
             <DonutBar
               title="Mix · Σ gross share by trailer family"
               caption="Donut + benchmark bar · same window"
@@ -115,22 +151,33 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
               defaultY="gross"
               defaultZ="gross"
             />
-            <FamilyWeeklyHistogram loads={scopedLoads} families={primary === 'All' ? familyNames : [primary]} />
+            <FamilyWeeklyHistogram
+              loads={histogramLoads}
+              families={histogramFamilies}
+              allFamilies={familyNames}
+            />
           </>
         )}
 
         {sub === 'units' && (
           <>
-            <div className="dcontrols" style={{ marginBottom: 16 }}>
-              <label className="dcheck">
-                <input type="checkbox" checked={unitFilterOn} onChange={(e) => setUnitFilterOn(e.target.checked)} />
-                Filter by units
-              </label>
-              {unitFilterOn && (
+            <UnitsEconomicsTable
+              rows={units}
+              extraControls={
+                <>
+                  {filterBar}
+                  <label className="dcheck">
+                    <input type="checkbox" checked={unitFilterOn} onChange={(e) => setUnitFilterOn(e.target.checked)} />
+                    Filter by units
+                  </label>
+                </>
+              }
+            />
+            {unitFilterOn && (
+              <div className="dcontrols" style={{ marginBottom: 16 }}>
                 <Checklist label="Units" options={allUnits} selected={unitSel} onChange={setUnitSel} render={(u) => `Unit ${u}`} />
-              )}
-            </div>
-            <UnitsEconomicsTable rows={units} />
+              </div>
+            )}
             <DonutBar
               title="Unit mix · Σ gross share"
               caption="Top 12 units · donut + benchmark bar"
@@ -144,12 +191,8 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
               defaultY="gross"
               defaultZ="gross"
             />
-            <UnitWeeklyHistogram loads={unitScoped} unitIds={units.map((u) => u.unitId)} />
+            <UnitWeeklyHistogram loads={unitScoped} unitIds={allUnitRows.map((u) => u.unitId)} />
           </>
-        )}
-
-        {sub === 'lines' && (
-          <FamilyWeeklyHistogram loads={scopedLoads} families={primary === 'All' ? familyNames : [primary]} />
         )}
       </div>
     </>

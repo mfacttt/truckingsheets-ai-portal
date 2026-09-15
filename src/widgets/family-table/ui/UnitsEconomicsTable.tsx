@@ -1,6 +1,7 @@
 import type { UnitEconomicsRow } from '@/entities/dashboard/lib/aggregate'
 import { formatMoney, formatMiles, formatNumber, formatShare, formatRpm } from '@/shared/lib/format/number'
 import { PremiumTable, type PremiumColumn } from '@/widgets/premium-table/ui/PremiumTable'
+import { CountExpandCell } from '@/widgets/premium-table/ui/CountExpandCell'
 import type { ReactNode } from 'react'
 
 const COLUMNS: PremiumColumn<UnitEconomicsRow>[] = [
@@ -29,8 +30,8 @@ const COLUMNS: PremiumColumn<UnitEconomicsRow>[] = [
   {
     key: 'desks',
     label: 'Dispatchers',
-    render: (r) => (r.dispatchers.slice(0, 2).join(', ') + (r.dispatchers.length > 2 ? '…' : '')) as ReactNode,
-    sortable: false,
+    value: (r) => r.dispatchers.length,
+    render: (r) => <CountExpandCell items={[...r.dispatchers].sort()} noun="dispatchers" />,
   },
 ]
 

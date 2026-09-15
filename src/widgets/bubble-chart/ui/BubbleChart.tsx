@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import {
   CartesianGrid,
+  LabelList,
   ResponsiveContainer,
   Scatter,
   ScatterChart,
@@ -146,6 +147,12 @@ export function BubbleChart({
             {data.map((d) => (
               <Cell key={d.name} fill={colorOf(d.name, d._i)} stroke="var(--card)" strokeWidth={1} />
             ))}
+            <LabelList
+              dataKey="name"
+              position="top"
+              offset={10}
+              style={{ fill: 'var(--ink-2)', fontSize: 10.5, fontWeight: 600 }}
+            />
           </Scatter>
         </ScatterChart>
       </ResponsiveContainer>

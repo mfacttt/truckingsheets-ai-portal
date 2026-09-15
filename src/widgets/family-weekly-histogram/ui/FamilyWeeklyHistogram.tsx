@@ -20,11 +20,24 @@ function formatMetric(metric: Metric, v: number): string {
   return formatNumber(Math.round(v))
 }
 
-export function FamilyWeeklyHistogram({ loads, families }: { loads: Load[]; families: string[] }) {
+export function FamilyWeeklyHistogram({
+  loads,
+  families,
+  allFamilies,
+}: {
+  loads: Load[]
+  families: string[]
+  allFamilies?: string[]
+}) {
   const [metric, setMetric] = useState<Metric>('gross')
   const [showLines, setShowLines] = useState(false)
+  const [compareAll, setCompareAll] = useState(false)
 
-  const data = useMemo(() => weeklyByFamily(loads, families, metric), [loads, families, metric])
+  const options = allFamilies ?? families
+  // With a single family picked the chart collapses to one series, which reads as a
+  // lone column; "Compare all" puts the other families back alongside it.
+  const shown = compareAll ? options : families
+  const data = useMemo(() => weeklyByFamily(loads, shown, metric), [loads, shown, metric])
 
   return (
     <div className="dcard">
@@ -43,6 +56,16 @@ export function FamilyWeeklyHistogram({ loads, families }: { loads: Load[]; fami
               ))}
             </select>
           </div>
+          {options.length > 1 && (
+            <button
+              type="button"
+              className={`seg-pill${compareAll ? ' is-active' : ''}`}
+              onClick={() => setCompareAll((v) => !v)}
+              title="Show every trailer family alongside the selected one"
+            >
+              Compare all families
+            </button>
+          )}
           <button type="button" className={`seg-pill${showLines ? ' is-active' : ''}`} onClick={() => setShowLines((v) => !v)}>
             Weekly lines
           </button>
@@ -55,8 +78,8 @@ export function FamilyWeeklyHistogram({ loads, families }: { loads: Load[]; fami
             <CartesianGrid stroke="var(--line)" strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="week" tickFormatter={(w) => `W${w}`} tick={{ fontSize: 11, fill: 'var(--ink-3)' }} axisLine={{ stroke: 'var(--line)' }} tickLine={false} />
             <YAxis tickFormatter={(v) => formatMetric(metric, v)} tick={{ fontSize: 11, fill: 'var(--ink-3)' }} axisLine={false} tickLine={false} width={64} />
-            <Tooltip content={<HistTooltip families={families} metric={metric} />} />
-            {families.map((fam) => (
+            <Tooltip content={<HistTooltip families={shown} metric={metric} />} />
+            {shown.map((fam) => (
               <Line key={fam} type="monotone" dataKey={fam} stroke={familyColor(fam)} strokeWidth={2} dot={false} />
             ))}
           </LineChart>
@@ -65,8 +88,8 @@ export function FamilyWeeklyHistogram({ loads, families }: { loads: Load[]; fami
             <CartesianGrid stroke="var(--line)" strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="week" tickFormatter={(w) => `W${w}`} tick={{ fontSize: 11, fill: 'var(--ink-3)' }} axisLine={{ stroke: 'var(--line)' }} tickLine={false} />
             <YAxis tickFormatter={(v) => formatMetric(metric, v)} tick={{ fontSize: 11, fill: 'var(--ink-3)' }} axisLine={false} tickLine={false} width={64} />
-            <Tooltip content={<HistTooltip families={families} metric={metric} />} />
-            {families.map((fam) => (
+            <Tooltip content={<HistTooltip families={shown} metric={metric} />} />
+            {shown.map((fam) => (
               <Bar key={fam} dataKey={fam} stackId="fam" fill={familyColor(fam)} />
             ))}
           </BarChart>

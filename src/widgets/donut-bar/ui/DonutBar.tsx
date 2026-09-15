@@ -1,4 +1,4 @@
-import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, Cell, LabelList, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 export interface DonutDatum {
   name: string
@@ -65,6 +65,11 @@ export function DonutBar({ title, data, caption }: { title: string; data: DonutD
               {data.map((d) => (
                 <Cell key={d.name} fill={d.color} />
               ))}
+              <LabelList
+                dataKey="display"
+                position="right"
+                style={{ fill: 'var(--ink-2)', fontSize: 11, fontVariantNumeric: 'tabular-nums' }}
+              />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

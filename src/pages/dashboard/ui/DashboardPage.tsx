@@ -4,6 +4,7 @@ import { useSession } from '@/entities/session/model/session-context'
 import { useLoads, weekBounds } from '@/entities/dashboard/data/use-loads'
 import { filterByWeekRange } from '@/entities/dashboard/lib/aggregate'
 import { useWeekRange } from '@/entities/dashboard/model/use-week-range'
+import { DashFiltersProvider } from '@/entities/dashboard/model/dash-filters'
 import { DashboardShell, type DashTab } from '@/widgets/dashboard-shell/ui/DashboardShell'
 import { DashRail } from '@/widgets/dash-rail/ui/DashRail'
 import { FormulaWiki } from '@/widgets/formula-wiki/ui/FormulaWiki'
@@ -27,26 +28,28 @@ export default function DashboardPage() {
 
   return (
     <DashRail contentKey="fleet">
-      <DashboardShell
-        tab={tab}
-        onTabChange={setTab}
-        weekMin={min}
-        weekMax={max}
-        range={range}
-        activePreset={activePreset}
-        onApplyPreset={applyPreset}
-        onApply={apply}
-        onReset={reset}
-      >
-        {tab === 'general' && <GeneralTab loads={filtered} onFormula={setFormulaCode} />}
-        {tab === 'trailer' && <TrailerTypeTab loads={filtered} />}
-        {tab === 'dispatchers' && <DispatchersTab loads={filtered} onFormula={setFormulaCode} />}
-        {tab === 'fleetstatus' && <FleetStatusTab />}
+      <DashFiltersProvider>
+        <DashboardShell
+          tab={tab}
+          onTabChange={setTab}
+          weekMin={min}
+          weekMax={max}
+          range={range}
+          activePreset={activePreset}
+          onApplyPreset={applyPreset}
+          onApply={apply}
+          onReset={reset}
+        >
+          {tab === 'general' && <GeneralTab loads={filtered} onFormula={setFormulaCode} />}
+          {tab === 'trailer' && <TrailerTypeTab loads={filtered} />}
+          {tab === 'dispatchers' && <DispatchersTab loads={filtered} onFormula={setFormulaCode} />}
+          {tab === 'fleetstatus' && <FleetStatusTab />}
 
-        {formulaCode && (
-          <FormulaWiki code={formulaCode} onSelect={setFormulaCode} onClose={() => setFormulaCode(null)} />
-        )}
-      </DashboardShell>
+          {formulaCode && (
+            <FormulaWiki code={formulaCode} onSelect={setFormulaCode} onClose={() => setFormulaCode(null)} />
+          )}
+        </DashboardShell>
+      </DashFiltersProvider>
     </DashRail>
   )
 }

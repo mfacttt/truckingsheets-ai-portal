@@ -2,8 +2,17 @@ import { familyColor } from '@/entities/dashboard/lib/aggregate'
 import type { FamilyShareRow } from '@/entities/dashboard/model/types'
 import { formatMoney, formatMiles, formatNumber, formatShare, formatRpm } from '@/shared/lib/format/number'
 import { PremiumTable, type PremiumColumn } from '@/widgets/premium-table/ui/PremiumTable'
+import type { ReactNode } from 'react'
 
-export function FamilyShareTable({ rows, weekCount }: { rows: FamilyShareRow[]; weekCount: number }) {
+export function FamilyShareTable({
+  rows,
+  weekCount,
+  extraControls,
+}: {
+  rows: FamilyShareRow[]
+  weekCount: number
+  extraControls?: ReactNode
+}) {
   const columns: PremiumColumn<FamilyShareRow>[] = [
     { key: 'gross', label: 'Σ gross', value: (r) => r.gross, render: (r) => formatMoney(r.gross), heat: true, leader: true },
     { key: 'rpm', label: 'RPM', value: (r) => r.rpm, render: (r) => formatRpm(r.rpm), heat: true, leader: true },
@@ -51,6 +60,7 @@ export function FamilyShareTable({ rows, weekCount }: { rows: FamilyShareRow[]; 
       )}
       defaultSort="gross"
       minWidth={960}
+      {...(extraControls ? { extraControls } : {})}
     />
   )
 }
