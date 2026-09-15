@@ -125,8 +125,8 @@ export function DonutBar({
               data={shown}
               dataKey="value"
               nameKey="name"
-              innerRadius={58}
-              outerRadius={92}
+              innerRadius={48}
+              outerRadius={76}
               paddingAngle={2}
               label={renderSharePercent(total)}
               labelLine={false}
