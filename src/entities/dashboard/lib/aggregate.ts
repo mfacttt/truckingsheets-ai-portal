@@ -419,7 +419,12 @@ export function median(values: number[]): number {
   return sorted.length % 2 === 0 ? ((sorted[mid - 1] ?? 0) + (sorted[mid] ?? 0)) / 2 : (sorted[mid] ?? 0)
 }
 
-const DESK_PALETTE = ['#F47920', '#1E7ABF', '#E06A12', '#0F9D58', '#FF9633', '#9333EA', '#2DB7C9', '#B85C38']
+/** Long enough for the twelve series the unit charts draw: a shorter list wraps,
+ *  and two series sharing a colour make the legend useless. */
+const DESK_PALETTE = [
+  '#F47920', '#1E7ABF', '#0F9D58', '#9333EA', '#2DB7C9', '#B85C38',
+  '#C08A0A', '#3B5BDB', '#12897B', '#D6336C', '#7048E8', '#8A6D3B',
+]
 
 export function deskColor(index: number): string {
   return DESK_PALETTE[index % DESK_PALETTE.length] ?? '#94A3B8'

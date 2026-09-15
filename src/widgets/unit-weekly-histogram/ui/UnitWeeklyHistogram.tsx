@@ -78,7 +78,7 @@ export function UnitWeeklyHistogram({ loads, unitIds }: { loads: Load[]; unitIds
             <YAxis tickFormatter={(v) => fmt(metric, v)} tick={{ fontSize: 11, fill: 'var(--ink-3)' }} axisLine={false} tickLine={false} width={64} />
             <Tooltip content={<UnitTip unitIds={shown} metric={metric} />} />
             {shown.map((u, i) => (
-              <Bar key={u} dataKey={String(u)} stackId="u" fill={deskColor(i)} />
+              <Bar key={u} dataKey={String(u)} fill={deskColor(i)} />
             ))}
           </BarChart>
         )}
