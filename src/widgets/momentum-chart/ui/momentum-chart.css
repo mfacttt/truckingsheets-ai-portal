@@ -3,7 +3,7 @@
 
 /* Series key for charts that draw more than two series — without it the only way
    to tell the colours apart is to hover each one. */
-.chart-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 14px; font-size: 12px; color: var(--ink-2); }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 14px; font-size: 12px; color: var(--ink); }
 .chart-legend span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .chart-legend i { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 .chart-card-title h2 { font-size: 1.08rem; letter-spacing: -.2px; }
