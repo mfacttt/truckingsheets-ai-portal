@@ -239,13 +239,17 @@ export function FleetStatusGrid({ loads }: { loads: FleetStatusLoad[] }) {
             </tbody>
             <tfoot className="fs-foot">
               <tr className="loaded">
-                <th scope="row">Loaded</th>
+                <th scope="row" title="Units on a pickup, in transit, delivering or turning that day">
+                  Loaded
+                </th>
                 {loadedRow.map((v, i) => (
                   <td key={i}>{v}</td>
                 ))}
               </tr>
               <tr className="rate">
-                <th scope="row">Σ load rate</th>
+                <th scope="row" title="Σ load rate on pickup days, across the units shown">
+                  Σ load rate
+                </th>
                 {pickupRateRow.map((v, i) => (
                   <td key={i}>{v > 0 ? formatMoney(v) : '—'}</td>
                 ))}
@@ -259,6 +263,10 @@ export function FleetStatusGrid({ loads }: { loads: FleetStatusLoad[] }) {
         <span><i style={{ background: 'var(--bubble-pickup)' }} /> Pickup (load rate on this day)</span>
         <span><i style={{ background: 'var(--bubble-transit)' }} /> In transit</span>
         <span><i style={{ background: 'var(--bubble-delivery)' }} /> Delivery day</span>
+        <span>
+          <i style={{ background: 'linear-gradient(90deg, var(--bubble-delivery) 50%, var(--bubble-pickup) 50%)' }} />
+          Turn (deliver + new pickup same day)
+        </span>
         <span><i style={{ background: 'var(--bubble-idle)', opacity: 0.4 }} /> Empty / idle</span>
       </div>
     </div>

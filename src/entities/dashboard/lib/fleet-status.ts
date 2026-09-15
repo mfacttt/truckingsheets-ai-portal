@@ -56,6 +56,9 @@ function cellStateForDay(unitLoads: FleetStatusLoad[], ymd: string): { state: Da
 }
 
 export function trailerFamily(raw: string | null): string {
+  // Matches the sheet-side normaliser: an empty trailer cell is its own bucket
+  // rather than being folded into Other, which is a real trailer label.
+  if (raw !== null && raw.trim() === '') return '(blank)'
   if (!raw) return 'Other'
   const n = raw.toLowerCase().replace(/[_\s-]+/g, '')
   if (/^local(reefer|refer|reffer|reef)?$/.test(n)) return 'Local'
