@@ -134,7 +134,9 @@ export function BubbleChart({
             tickLine={false}
             width={62}
           />
-          <ZAxis type="number" dataKey="_z" range={[80, 900]} />
+          {/* Smaller than the eye-catching default on purpose: at the old size the
+              biggest dots reached under their neighbours' labels. */}
+          <ZAxis type="number" dataKey="_z" range={[60, 460]} />
           <Tooltip
             cursor={{ strokeDasharray: '3 3' }}
             content={({ active, payload }) => {
@@ -157,11 +159,14 @@ export function BubbleChart({
             ))}
             {/* fill has to be the attribute, not a style: recharts writes the series
                 colour onto the label as an attribute, and a style object loses to it. */}
+            {/* stroke="none" matters: the dots' outline is inherited by their labels,
+                and a 1px stroke over 10.5px letters eats the glyphs from the inside. */}
             <LabelList
               dataKey="_label"
               position="top"
               offset={18}
               fill="var(--ink)"
+              stroke="none"
               fontSize={10.5}
               fontWeight={600}
             />
