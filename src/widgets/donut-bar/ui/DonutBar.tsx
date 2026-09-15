@@ -179,7 +179,7 @@ export function DonutBar({
               <LabelList
                 dataKey="display"
                 position="right"
-                style={{ fill: 'var(--ink-2)', fontSize: 11, fontVariantNumeric: 'tabular-nums' }}
+                style={{ fill: 'var(--ink)', fontSize: 11, fontVariantNumeric: 'tabular-nums' }}
               />
             </Bar>
           </BarChart>

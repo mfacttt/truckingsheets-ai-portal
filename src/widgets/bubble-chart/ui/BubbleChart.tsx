@@ -151,7 +151,7 @@ export function BubbleChart({
               dataKey="name"
               position="top"
               offset={10}
-              style={{ fill: 'var(--ink-2)', fontSize: 10.5, fontWeight: 600 }}
+              style={{ fill: 'var(--ink)', fontSize: 10.5, fontWeight: 600 }}
             />
           </Scatter>
         </ScatterChart>
