@@ -139,6 +139,21 @@ export function FleetStatusGrid({ loads }: { loads: FleetStatusLoad[] }) {
           <input type="checkbox" checked={deskFilterOn} onChange={(e) => setDeskFilterOn(e.target.checked)} />
           Filter by dispatcher
         </label>
+        <button
+          type="button"
+          className="btn btn-quiet btn-sm fs-reset"
+          title="Show every unit again and drop the trailer-type and dispatcher filters"
+          onClick={() => {
+            setTrailerType('All')
+            setHideInactive(false)
+            setUnitFilterOn(false)
+            setDeskFilterOn(false)
+            setUnitSel(new Set())
+            setDeskSel(new Set())
+          }}
+        >
+          Reset filters
+        </button>
       </div>
 
       {(unitFilterOn || deskFilterOn) && (
