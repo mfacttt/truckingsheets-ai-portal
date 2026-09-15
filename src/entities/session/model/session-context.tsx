@@ -33,6 +33,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let alive = true
     void (async () => {
+      // Local preview signs itself in: the dashboard is demo data, and waiting on an
+      // emailed code from the shared identity-service just slows down looking at it.
+      // import.meta.env.DEV is false in any build, so this never ships.
+      if (import.meta.env.DEV) {
+        if (alive) {
+          setUserState({ userId: 'local-preview', email: 'preview@truckingsheets.ai', role: 'User' })
+          setRestoring(false)
+        }
+        return
+      }
+
       const existing = getCurrentUser()
       if (existing) {
         if (alive) setUserState(existing)
