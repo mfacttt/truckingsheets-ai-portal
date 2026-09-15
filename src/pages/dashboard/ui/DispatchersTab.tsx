@@ -25,6 +25,28 @@ import { formatMoney, formatMiles, formatNumber, formatRpm } from '@/shared/lib/
 
 const TOP_N_OPTIONS = [10, 15, 20, 0] as const
 
+type DeskUnitMetric = 'gross' | 'avgGrossWk' | 'rpm' | 'miles' | 'avgGrossWeekUnit' | 'avgLoadRate' | 'loads'
+
+const DESK_UNIT_METRICS: { value: DeskUnitMetric; label: string }[] = [
+  { value: 'gross', label: 'Gross' },
+  { value: 'avgGrossWk', label: 'Avg $/wk' },
+  { value: 'rpm', label: 'RPM' },
+  { value: 'miles', label: 'Miles' },
+  { value: 'avgGrossWeekUnit', label: 'Avg $/wk · unit' },
+  { value: 'avgLoadRate', label: 'Avg load rate' },
+  { value: 'loads', label: 'Loads' },
+]
+
+const DESK_UNIT_METRIC_VALUE: Record<DeskUnitMetric, (r: DeskUnitRow) => number> = {
+  gross: (r) => r.gross,
+  avgGrossWk: (r) => r.avgGrossPerWeek,
+  rpm: (r) => r.rpm,
+  miles: (r) => r.miles,
+  avgGrossWeekUnit: (r) => (r.unitCount > 0 ? r.avgGrossPerWeek / r.unitCount : 0),
+  avgLoadRate: (r) => r.avgLoadRate,
+  loads: (r) => r.loads,
+}
+
 type SubTab = 'overview' | 'deskunits' | 'units'
 
 const SUB_TABS: { value: SubTab; label: string }[] = [
@@ -33,7 +55,35 @@ const SUB_TABS: { value: SubTab; label: string }[] = [
   { value: 'units', label: 'Units' },
 ]
 
+/** Count + expandable list. A single entry shows as itself, matching the prod board. */
+function CountExpandCell({ items, noun }: { items: (string | number)[]; noun: string }) {
+  const [open, setOpen] = useState(false)
+  if (items.length === 0) return <span>–</span>
+  if (items.length === 1) return <span className="unit-count-single">{items[0]}</span>
+  return (
+    <div className="unit-count-cell">
+      <div className="unit-count-head">
+        <button
+          type="button"
+          className="unit-count-toggle"
+          aria-expanded={open}
+          aria-label={open ? `Hide ${noun}` : `Show ${noun}`}
+          title={open ? `Hide ${noun}` : `Show ${noun}`}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? '▼' : '▶'}
+        </button>
+        <span className="unit-count-n" title={`${items.length} ${noun}`}>
+          {items.length}
+        </span>
+      </div>
+      {open && <div className="unit-count-list">{items.join(', ')}</div>}
+    </div>
+  )
+}
+
 const DESK_UNIT_COLUMNS: PremiumColumn<DeskUnitRow>[] = [
+  { key: 'desk', label: 'Dispatcher', render: (r) => r.desk, sortable: false },
   { key: 'gross', label: 'Σ gross', value: (r) => r.gross, render: (r) => formatMoney(r.gross), heat: true, leader: true },
   { key: 'rpm', label: 'RPM', value: (r) => r.rpm, render: (r) => formatRpm(r.rpm), heat: true, leader: true },
   { key: 'miles', label: 'Σ mi', value: (r) => r.miles, render: (r) => formatMiles(r.miles), heat: true },
@@ -47,6 +97,9 @@ const DESK_UNIT_COLUMNS: PremiumColumn<DeskUnitRow>[] = [
   },
   { key: 'avgLoadRate', label: 'Avg load rate', value: (r) => r.avgLoadRate, render: (r) => formatMoney(r.avgLoadRate), heat: true },
   { key: 'loads', label: 'Loads', value: (r) => r.loads, render: (r) => formatNumber(r.loads), heat: true, leader: true },
+  { key: 'loadsPerUnit', label: 'Loads / unit', value: (r) => r.loadsPerUnit, render: (r) => r.loadsPerUnit.toFixed(1), heat: true },
+  { key: 'grossPerUnit', label: 'Gross / unit', value: (r) => r.grossPerUnit, render: (r) => formatMoney(r.grossPerUnit), heat: true },
+  { key: 'unitCount', label: 'Active units', value: (r) => r.unitCount, render: (r) => r.unitCount, heat: true },
   { key: 'weeks', label: 'Weeks · active', value: (r) => r.weeksActive, render: (r) => r.weeksActive, sortable: false },
 ]
 
@@ -67,8 +120,8 @@ const UNIT_COLUMNS: PremiumColumn<UnitEconomicsRow>[] = [
   {
     key: 'desks',
     label: 'Dispatchers',
-    render: (r) => r.dispatchers.slice(0, 3).join(', ') + (r.dispatchers.length > 3 ? '…' : ''),
-    sortable: false,
+    value: (r) => r.dispatchers.length,
+    render: (r) => <CountExpandCell items={[...r.dispatchers].sort()} noun="dispatchers" />,
   },
 ]
 
@@ -78,6 +131,9 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
   const [familyFilter, setFamilyFilter] = useState('All')
   const [deskSel, setDeskSel] = useState<Set<string>>(new Set())
   const [deskFilterOn, setDeskFilterOn] = useState(false)
+  const [unitSel, setUnitSel] = useState<Set<number>>(new Set())
+  const [unitFilterOn, setUnitFilterOn] = useState(false)
+  const [metric, setMetric] = useState<DeskUnitMetric>('gross')
   const [modalFamily, setModalFamily] = useState<string | null>(null)
 
   const ledger = weeklyLedger(loads)
@@ -107,7 +163,16 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
   )
   const { best, worst } = useMemo(() => deskRpmRanked(scoped), [scoped])
 
-  const dUnitRows = useMemo(() => deskUnitRows(scoped, weeks), [scoped, weeks])
+  const allUnitIds = useMemo(() => [...new Set(loads.map((l) => l.unitId))].sort((a, b) => a - b), [loads])
+  const deskUnitScoped = useMemo(
+    () => (unitFilterOn && unitSel.size > 0 ? scoped.filter((l) => unitSel.has(l.unitId)) : scoped),
+    [scoped, unitFilterOn, unitSel],
+  )
+  const dUnitRows = useMemo(() => {
+    const all = deskUnitRows(deskUnitScoped, weeks)
+    const ranked = [...all].sort((a, b) => DESK_UNIT_METRIC_VALUE[metric](b) - DESK_UNIT_METRIC_VALUE[metric](a))
+    return topN > 0 ? ranked.slice(0, topN) : ranked
+  }, [deskUnitScoped, weeks, metric, topN])
   const unitRows = useMemo(() => unitEconomics(scoped, weeks), [scoped, weeks])
   const unitBubbles = useMemo(() => bubbleByUnit(scoped, weeks), [scoped, weeks])
 
@@ -154,6 +219,41 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
         ))}
       </select>
     </div>
+  )
+
+  const deskUnitControls = (
+    <>
+      {familyControl}
+      <div className="dfield">
+        <label>Metric</label>
+        <select
+          className="dselect"
+          value={metric}
+          onChange={(e) => setMetric(e.target.value as DeskUnitMetric)}
+          style={{ minWidth: 150 }}
+        >
+          {DESK_UNIT_METRICS.map((m) => (
+            <option key={m.value} value={m.value}>{m.label}</option>
+          ))}
+        </select>
+      </div>
+      <div className="dfield">
+        <label>Top N</label>
+        <select className="dselect" value={topN} onChange={(e) => setTopN(Number(e.target.value))} style={{ minWidth: 90 }}>
+          {TOP_N_OPTIONS.map((n) => (
+            <option key={n} value={n}>{n === 0 ? 'All' : n}</option>
+          ))}
+        </select>
+      </div>
+      <label className="dcheck">
+        <input type="checkbox" checked={deskFilterOn} onChange={(e) => setDeskFilterOn(e.target.checked)} />
+        Filter by dispatcher
+      </label>
+      <label className="dcheck">
+        <input type="checkbox" checked={unitFilterOn} onChange={(e) => setUnitFilterOn(e.target.checked)} />
+        Filter by units
+      </label>
+    </>
   )
 
   return (
@@ -276,17 +376,22 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
             </div>
 
             <PremiumTable
-              title="Dispatcher × unit table"
-              caption="One row per dispatcher–unit pair · sortable · heat-shaded"
+              title="Dispatchers & units"
+              caption="One row per dispatcher · expand Unit to see the unit numbers behind it"
               rows={dUnitRows}
               columns={DESK_UNIT_COLUMNS}
-              rowKey={(r) => `${r.desk}-${r.unitId}`}
-              firstColLabel="Dispatcher · Unit"
-              firstCol={(r) => `${r.desk} · U${r.unitId}`}
+              rowKey={(r) => r.desk}
+              firstColLabel="Unit"
+              firstCol={(r) => <CountExpandCell items={r.units} noun="unit numbers" />}
               defaultSort="gross"
-              minWidth={920}
-              extraControls={familyControl}
+              minWidth={1020}
+              extraControls={deskUnitControls}
             />
+            {unitFilterOn && (
+              <div className="dcontrols" style={{ marginBottom: 16 }}>
+                <Checklist label="Units" options={allUnitIds} selected={unitSel} onChange={setUnitSel} render={(u) => `Unit ${u}`} />
+              </div>
+            )}
             <BubbleChart
               title="Desk × units"
               points={deskBubbles}
