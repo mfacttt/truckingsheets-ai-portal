@@ -46,15 +46,27 @@
 .hp-legend span { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--ink-2); }
 .hp-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
+/* One width for all of them: sized to their own text they came out ragged, and
+   the eye reads five different widths as five unrelated things. */
 .hp-float {
   position: absolute; z-index: 3; background: var(--card);
   border: 1px solid color-mix(in srgb, #fff 40%, var(--line));
   border-radius: 14px; padding: 11px 14px; box-shadow: 0 18px 40px -14px rgba(13,31,60,.4);
   display: flex; align-items: center; gap: 10px;
+  width: 196px; box-sizing: border-box;
   animation: hpFloat 5.5s ease-in-out infinite;
 }
-.hp-float-a { top: 64px; right: -30px; animation-delay: -1s; }
-.hp-float-b { bottom: 40px; left: -36px; animation-delay: -3s; }
+.hp-float-txt { min-width: 0; }
+.hp-float-txt b, .hp-float-txt span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Anchored outside the panel's edges rather than overlapping them: these sit on
+   top of the dashboard, and at a negative inset they hid its own numbers. */
+/* Two tidy rows clear of the panel — two above, three below — rather than five
+   cards scattered at whatever inset each happened to have. */
+.hp-float-a { bottom: calc(100% + 14px); left: 0; animation-delay: -1s; }
+.hp-float-b { bottom: calc(100% + 14px); right: 0; animation-delay: -3s; }
+.hp-float-c { top: calc(100% + 14px); left: 0; animation-delay: -2s; }
+.hp-float-d { top: calc(100% + 14px); left: 50%; margin-left: -98px; animation-delay: -4.5s; }
+.hp-float-e { top: calc(100% + 14px); right: 0; animation-delay: -2.5s; }
 @keyframes hpFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
 @media (prefers-reduced-motion: reduce) { .hp-float { animation: none; } }
 .hp-float-ic {
@@ -66,9 +78,11 @@
 .hp-float-txt b { display: block; font-family: var(--display); font-weight: 800; font-size: 15px; color: var(--navy); line-height: 1.1; font-variant-numeric: tabular-nums; }
 .hp-float-txt span { font-size: 10.5px; color: var(--ink-3); }
 
-@media (max-width: 1080px) {
-  .hp-float-a { right: -12px; }
-  .hp-float-b { left: -12px; }
+/* Narrower viewports have no room beside the panel, so only the pair that can
+   clear it stays — overlapping it again would defeat the point. */
+/* Three fixed-width cards stop fitting across the panel before the rows do. */
+@media (max-width: 1360px) {
+  .hp-float-d { display: none; }
 }
 @media (max-width: 940px) {
   .hp-stage { max-width: 500px; margin: 0 auto; }

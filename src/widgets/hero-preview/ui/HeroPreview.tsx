@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Area, ComposedChart, Line, ResponsiveContainer, XAxis, YAxis } from 'recharts'
-import { GaugeIcon, TrendingUpIcon } from '@/shared/ui/icons'
+import { ChartIcon, GaugeIcon, LayersIcon, TruckIcon, TrendingUpIcon } from '@/shared/ui/icons'
 import './hero-preview.css'
 
 const WEEKS = [
@@ -15,6 +15,16 @@ const WEEKS = [
   { w: 'W33', gross: 226, rpm: 3.46 },
   { w: 'W36', gross: 242, rpm: 3.5 },
 ]
+
+/** Five readings placed around the dashboard, clear of it: sat over the panel
+ *  they covered the very table they were meant to advertise. */
+const FLOATS = [
+  { pos: 'a', tone: 'sky', value: '$5,121.93', label: 'fleet avg / wk · truck', icon: <GaugeIcon /> },
+  { pos: 'b', tone: 'sun', value: '+12.4%', label: 'WoW gross · Week 29', icon: <TrendingUpIcon /> },
+  { pos: 'c', tone: 'sky', value: '36 units', label: 'tracked this window', icon: <TruckIcon /> },
+  { pos: 'd', tone: 'sun', value: '$3.69', label: 'best RPM · Flatbed', icon: <ChartIcon /> },
+  { pos: 'e', tone: 'sky', value: '2,537', label: 'loads · W1–W36', icon: <LayersIcon /> },
+] as const
 
 export function HeroPreview() {
   const [mounted, setMounted] = useState(false)
@@ -145,24 +155,15 @@ export function HeroPreview() {
         </div>
       </div>
 
-      <div className="hp-float hp-float-a">
-        <span className="hp-float-ic f-sky">
-          <GaugeIcon />
-        </span>
-        <span className="hp-float-txt">
-          <b>$5,121.93</b>
-          <span>fleet avg / wk · truck</span>
-        </span>
-      </div>
-      <div className="hp-float hp-float-b">
-        <span className="hp-float-ic f-sun">
-          <TrendingUpIcon />
-        </span>
-        <span className="hp-float-txt">
-          <b>+12.4%</b>
-          <span>WoW gross · Week 29</span>
-        </span>
-      </div>
+      {FLOATS.map((f) => (
+        <div className={`hp-float hp-float-${f.pos}`} key={f.pos}>
+          <span className={`hp-float-ic f-${f.tone}`}>{f.icon}</span>
+          <span className="hp-float-txt">
+            <b>{f.value}</b>
+            <span>{f.label}</span>
+          </span>
+        </div>
+      ))}
     </div>
   )
 }
