@@ -21,7 +21,6 @@ import { BubbleChart } from '@/widgets/bubble-chart/ui/BubbleChart'
 import { DonutBar } from '@/widgets/donut-bar/ui/DonutBar'
 import { RpmRankTables } from '@/widgets/rpm-rank-tables/ui/RpmRankTables'
 import { DeskWeekModal } from '@/widgets/desk-week-modal/ui/DeskWeekModal'
-import { UnitFilterPopover } from '@/widgets/premium-table/ui/UnitFilterPopover'
 import { CountExpandCell } from '@/widgets/premium-table/ui/CountExpandCell'
 import { PremiumTable, type PremiumColumn } from '@/widgets/premium-table/ui/PremiumTable'
 import { formatMoney, formatMiles, formatNumber, formatRpm } from '@/shared/lib/format/number'
@@ -89,10 +88,8 @@ const UNIT_COLUMNS: PremiumColumn<UnitEconomicsRow>[] = [
 
 export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(code: string): void }) {
   const [sub, setSub] = useState<SubTab>('overview')
-  const [deskSel, setDeskSel] = useState<Set<string>>(new Set())
-  const [deskFilterOn, setDeskFilterOn] = useState(false)
   const [modalFamily, setModalFamily] = useState<string | null>(null)
-  const { keepsFamily, metric, topN, units: unitSel, unitsOn: unitFilterOn } = useDashFilters()
+  const { keepsFamily, keepsDesk, metric, topN, units: unitSel, unitsOn: unitFilterOn } = useDashFilters()
 
   const ledger = weeklyLedger(loads)
   const weeks = ledger.length
@@ -101,9 +98,8 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
 
   const scoped = useMemo(() => {
     let out = loads.filter((l) => keepsFamily(l.family))
-    if (deskFilterOn) out = out.filter((l) => deskSel.has(l.dispatcher))
-    return out
-  }, [loads, keepsFamily, deskFilterOn, deskSel])
+    return out.filter((l) => keepsDesk(l.dispatcher))
+  }, [loads, keepsFamily, keepsDesk])
 
   const allRows = dispatcherRows(scoped, weeks)
   const rows = topN > 0 ? allRows.slice(0, topN) : allRows
@@ -142,24 +138,13 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
     display: formatMoney(r.gross),
   }))
 
-  const deskFilterToggle = (
-    <UnitFilterPopover
-      label="Filter by dispatcher"
-      on={deskFilterOn}
-      onToggle={setDeskFilterOn}
-      options={allDeskNames}
-      selected={deskSel}
-      onChange={setDeskSel}
-    />
-  )
-
-
+  // Units only where units are the subject: the overview is about desks.
   const filterBar = (
-    <>
-      {/* Units only where units are the subject: the overview is about desks. */}
-      <DashFilterBar families={familyNames} {...(sub === 'overview' ? {} : { unitOptions: allUnitIds })} />
-      {deskFilterToggle}
-    </>
+    <DashFilterBar
+      families={familyNames}
+      deskOptions={allDeskNames}
+      {...(sub === 'overview' ? {} : { unitOptions: allUnitIds })}
+    />
   )
 
   return (

@@ -21,13 +21,17 @@ interface DashFilters {
   topN: number
   units: Set<number>
   unitsOn: boolean
+  desks: Set<string>
   setFamilies(v: Set<string>): void
   setMetric(v: DashMetric): void
   setTopN(v: number): void
   setUnits(v: Set<number>): void
   setUnitsOn(v: boolean): void
+  setDesks(v: Set<string>): void
   /** True when the row's family is among the picked ones. */
   keepsFamily(family: string): boolean
+  /** True when the row's dispatcher is among the picked ones. */
+  keepsDesk(desk: string): boolean
 }
 
 const DashFiltersContext = createContext<DashFilters | null>(null)
@@ -42,6 +46,7 @@ export function DashFiltersProvider({ children }: { children: ReactNode }) {
   // be followed from the trailer boards through to the dispatcher ones.
   const [units, setUnits] = useState<Set<number>>(new Set())
   const [unitsOn, setUnitsOn] = useState(false)
+  const [desks, setDesks] = useState<Set<string>>(new Set())
 
   const value = useMemo<DashFilters>(
     () => ({
@@ -50,14 +55,17 @@ export function DashFiltersProvider({ children }: { children: ReactNode }) {
       topN,
       units,
       unitsOn,
+      desks,
       setFamilies,
       setMetric,
       setTopN,
       setUnits,
       setUnitsOn,
+      setDesks,
       keepsFamily: (f: string) => families.size === 0 || families.has(f),
+      keepsDesk: (d: string) => desks.size === 0 || desks.has(d),
     }),
-    [families, metric, topN, units, unitsOn],
+    [families, metric, topN, units, unitsOn, desks],
   )
   return <DashFiltersContext.Provider value={value}>{children}</DashFiltersContext.Provider>
 }

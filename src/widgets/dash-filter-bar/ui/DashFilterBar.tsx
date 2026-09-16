@@ -9,11 +9,13 @@ export function DashFilterBar({
   showTopN = true,
   showMetric = true,
   unitOptions,
+  deskOptions,
 }: {
   families: string[]
   showTopN?: boolean
   showMetric?: boolean
   unitOptions?: number[]
+  deskOptions?: string[]
 }) {
   const {
     families: pickedFamilies,
@@ -21,11 +23,13 @@ export function DashFilterBar({
     topN,
     units,
     unitsOn,
+    desks,
     setFamilies,
     setMetric,
     setTopN,
     setUnits,
     setUnitsOn,
+    setDesks,
   } = useDashFilters()
 
   return (
@@ -64,6 +68,17 @@ export function DashFilterBar({
             ))}
           </select>
         </div>
+      )}
+
+      {deskOptions && deskOptions.length > 0 && (
+        <MultiFilterButton<string>
+          label="Dispatchers"
+          options={deskOptions}
+          picked={desks}
+          onChange={setDesks}
+          colorOf={(_d, i) => deskColor(i)}
+          allLabel="All dispatchers"
+        />
       )}
 
       {unitOptions && unitOptions.length > 0 && (
