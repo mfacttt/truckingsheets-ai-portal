@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   CartesianGrid,
   LabelList,
@@ -17,6 +17,7 @@ import {
   type BubblePoint,
 } from '@/entities/dashboard/lib/aggregate'
 import { formatMoney, formatMoneyCompact, formatNumber, formatRpm, formatShare } from '@/shared/lib/format/number'
+import { SeriesPicker } from '@/widgets/premium-table/ui/SeriesPicker'
 
 const METRICS = Object.keys(BUBBLE_METRIC_LABELS) as BubbleMetric[]
 
@@ -55,27 +56,8 @@ export function BubbleChart({
   const [y, setY] = useState<BubbleMetric>(defaultY)
   const [z, setZ] = useState<BubbleMetric>(defaultZ)
   const [hidden, setHidden] = useState<Set<string>>(new Set())
-  const [pickOpen, setPickOpen] = useState(false)
-  const pick = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!pickOpen) return
-    function onDown(e: PointerEvent) {
-      if (!pick.current?.contains(e.target as Node)) setPickOpen(false)
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setPickOpen(false)
-    }
-    document.addEventListener('pointerdown', onDown)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('pointerdown', onDown)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [pickOpen])
 
   const names = useMemo(() => points.map((p) => p.name), [points])
-  const shownNames = useMemo(() => names.filter((n) => !hidden.has(n)), [names, hidden])
 
   // Every plotted dot carries its name. Dropping the crowd through the picker is
   // what keeps the labels from piling onto each other near the origin.
@@ -86,15 +68,6 @@ export function BubbleChart({
         .filter((p) => !hidden.has(p.name)),
     [points, x, y, z, hidden],
   )
-
-  function toggle(name: string) {
-    setHidden((prev) => {
-      const next = new Set(prev)
-      if (next.has(name)) next.delete(name)
-      else next.add(name)
-      return next
-    })
-  }
 
   return (
     <div className="dcard">
@@ -131,39 +104,7 @@ export function BubbleChart({
               ))}
             </select>
           </div>
-          <div className="dfield bubble-pick" ref={pick}>
-            <label>Show</label>
-            <button
-              type="button"
-              className="dselect bubble-pick-btn"
-              aria-expanded={pickOpen}
-              onClick={() => setPickOpen((v) => !v)}
-            >
-              {shownNames.length === names.length ? `All ${names.length}` : `${shownNames.length} of ${names.length}`}
-              <span className="bubble-pick-caret">{pickOpen ? '▲' : '▼'}</span>
-            </button>
-            {pickOpen && (
-              <div className="bubble-pick-pop">
-                <div className="dchecklist-head">
-                  <button type="button" className="linklike" onClick={() => setHidden(new Set())}>
-                    All
-                  </button>
-                  <button type="button" className="linklike" onClick={() => setHidden(new Set(names))}>
-                    None
-                  </button>
-                </div>
-                <div className="bubble-pick-list">
-                  {names.map((n, i) => (
-                    <label key={n}>
-                      <input type="checkbox" checked={!hidden.has(n)} onChange={() => toggle(n)} />
-                      <i style={{ background: colorOf(n, i) }} />
-                      {n}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          <SeriesPicker options={names} hidden={hidden} onChange={setHidden} colorOf={colorOf} noun="dots" />
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import {
 } from '@/entities/dashboard/lib/aggregate'
 import type { Load } from '@/entities/dashboard/model/types'
 import { weekLabelWithDates } from '@/entities/dashboard/lib/week-dates'
+import { SeriesPicker } from '@/widgets/premium-table/ui/SeriesPicker'
 import { formatMoneyCompact, formatNumber, formatRpm, formatShare } from '@/shared/lib/format/number'
 import '../../momentum-chart/ui/momentum-chart.css'
 
@@ -32,35 +33,20 @@ export function FamilyWeeklyHistogram({
 }) {
   const [metric, setMetric] = useState<Metric>('gross')
   const [showLines, setShowLines] = useState(false)
-  const [compareAll, setCompareAll] = useState(false)
   const [hidden, setHidden] = useState<Set<string>>(new Set())
 
-  const options = allFamilies ?? families
-  // With a single family picked the chart collapses to one series, which reads as a
-  // lone column; "Compare all" puts the other families back alongside it.
-  const series = compareAll ? options : families
-  // Grouped bars thin out to a couple of pixels once every family is on at once,
-  // so the key doubles as the filter for which ones actually get drawn.
+  // Every family is a candidate series; the picker is what narrows them, so a
+  // single-family board pick no longer collapses the chart to one lone column.
+  const series = allFamilies ?? families
   const shown = useMemo(() => series.filter((f) => !hidden.has(f)), [series, hidden])
   const data = useMemo(() => weeklyByFamily(loads, shown, metric), [loads, shown, metric])
-
-  function toggle(fam: string) {
-    setHidden((prev) => {
-      const next = new Set(prev)
-      if (next.has(fam)) next.delete(fam)
-      else next.add(fam)
-      return next
-    })
-  }
 
   return (
     <div className="dcard">
       <div className="chart-card-head">
         <div className="chart-card-title">
           <h2>Weekly Σ gross by trailer family — histogram</h2>
-          <p>
-            {shown.length} of {series.length} families · click the key to add or drop a series
-          </p>
+          <p>One series per trailer family · pick which ones in Show</p>
         </div>
         <div className="chart-metric-controls">
           <div className="chart-metric-field">
@@ -73,46 +59,17 @@ export function FamilyWeeklyHistogram({
               ))}
             </select>
           </div>
-          {options.length > 1 && (
-            <button
-              type="button"
-              className={`seg-pill${compareAll ? ' is-active' : ''}`}
-              onClick={() => setCompareAll((v) => !v)}
-              title="Show every trailer family alongside the selected one"
-            >
-              Compare all families
-            </button>
-          )}
+          <SeriesPicker
+            options={series}
+            hidden={hidden}
+            onChange={setHidden}
+            colorOf={(fam) => familyColor(fam)}
+            noun="families"
+          />
           <button type="button" className={`seg-pill${showLines ? ' is-active' : ''}`} onClick={() => setShowLines((v) => !v)}>
             Weekly lines
           </button>
         </div>
-      </div>
-
-      <div className="chart-legend">
-        {series.map((fam) => (
-          <button
-            key={fam}
-            type="button"
-            className={hidden.has(fam) ? 'is-off' : undefined}
-            onClick={() => toggle(fam)}
-            aria-pressed={!hidden.has(fam)}
-            title={hidden.has(fam) ? `Show ${fam}` : `Hide ${fam}`}
-          >
-            <i style={{ background: familyColor(fam) }} />
-            {fam}
-          </button>
-        ))}
-        {series.length > 1 && (
-          <span className="chart-legend-actions">
-            <button type="button" onClick={() => setHidden(new Set())}>
-              All
-            </button>
-            <button type="button" onClick={() => setHidden(new Set(series.slice(1)))}>
-              Only top
-            </button>
-          </span>
-        )}
       </div>
 
       <ResponsiveContainer width="100%" height={280}>

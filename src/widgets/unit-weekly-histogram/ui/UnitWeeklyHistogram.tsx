@@ -8,6 +8,7 @@ import {
 } from '@/entities/dashboard/lib/aggregate'
 import type { Load } from '@/entities/dashboard/model/types'
 import { weekLabelWithDates } from '@/entities/dashboard/lib/week-dates'
+import { SeriesPicker } from '@/widgets/premium-table/ui/SeriesPicker'
 import { formatMoneyCompact, formatNumber, formatRpm, formatShare } from '@/shared/lib/format/number'
 import '../../momentum-chart/ui/momentum-chart.css'
 
@@ -32,23 +33,12 @@ export function UnitWeeklyHistogram({ loads, unitIds }: { loads: Load[]; unitIds
   const shown = useMemo(() => series.filter((u) => !hidden.has(u)), [series, hidden])
   const data = useMemo(() => weeklyByUnit(loads, shown, metric), [loads, shown, metric])
 
-  function toggle(unit: number) {
-    setHidden((prev) => {
-      const next = new Set(prev)
-      if (next.has(unit)) next.delete(unit)
-      else next.add(unit)
-      return next
-    })
-  }
-
   return (
     <div className="dcard">
       <div className="chart-card-head">
         <div className="chart-card-title">
           <h2>Weekly {METRIC_LABELS[metric]} by unit</h2>
-          <p>
-            {shown.length} of {series.length} units · click the key to add or drop a series
-          </p>
+          <p>One series per unit · pick which ones in Show</p>
         </div>
         <div className="chart-metric-controls">
           <div className="chart-metric-field">
@@ -61,36 +51,18 @@ export function UnitWeeklyHistogram({ loads, unitIds }: { loads: Load[]; unitIds
               ))}
             </select>
           </div>
+          <SeriesPicker
+            options={series}
+            hidden={hidden}
+            onChange={setHidden}
+            colorOf={(_u, i) => deskColor(i)}
+            render={(u) => `Unit ${u}`}
+            noun="units"
+          />
           <button type="button" className={`seg-pill${showLines ? ' is-active' : ''}`} onClick={() => setShowLines((v) => !v)}>
             Weekly lines
           </button>
         </div>
-      </div>
-
-      <div className="chart-legend">
-        {series.map((u, i) => (
-          <button
-            key={u}
-            type="button"
-            className={hidden.has(u) ? 'is-off' : undefined}
-            onClick={() => toggle(u)}
-            aria-pressed={!hidden.has(u)}
-            title={hidden.has(u) ? `Show unit ${u}` : `Hide unit ${u}`}
-          >
-            <i style={{ background: deskColor(i) }} />
-            Unit {u}
-          </button>
-        ))}
-        {series.length > 1 && (
-          <span className="chart-legend-actions">
-            <button type="button" onClick={() => setHidden(new Set())}>
-              All
-            </button>
-            <button type="button" onClick={() => setHidden(new Set(series.slice(5)))}>
-              Top 5
-            </button>
-          </span>
-        )}
       </div>
 
       <ResponsiveContainer width="100%" height={280}>
