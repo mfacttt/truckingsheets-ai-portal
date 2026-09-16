@@ -24,10 +24,12 @@ function fmt(metric: Metric, v: number): string {
 
 export function UnitWeeklyHistogram({ loads, unitIds }: { loads: Load[]; unitIds: number[] }) {
   const [metric, setMetric] = useState<Metric>('gross')
-  const [showLines, setShowLines] = useState(false)
+  // Lines by default: a dozen units drawn as grouped bars run out of
+  // distinguishable colours long before they run out of room.
+  const [showLines, setShowLines] = useState(true)
   const [hidden, setHidden] = useState<Set<number>>(new Set())
 
-  const series = useMemo(() => unitIds.slice(0, 12), [unitIds])
+  const series = unitIds
   // Twelve units side by side on a full season leaves each bar about a pixel wide,
   // so the key doubles as the filter for which ones actually get drawn.
   const shown = useMemo(() => series.filter((u) => !hidden.has(u)), [series, hidden])

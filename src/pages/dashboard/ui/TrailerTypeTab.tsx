@@ -135,7 +135,7 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
 
   const unitMixData = useMemo(
     () =>
-      units.slice(0, 12).map((u, i) => ({
+      units.map((u, i) => ({
         name: `Unit ${u.unitId}`,
         value: u.gross,
         color: deskColor(i),
@@ -211,7 +211,7 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
             />
             <DonutBar
               title="Unit mix · Σ gross share"
-              caption="Top 12 units · donut + benchmark bar"
+              caption="Donut + benchmark bar · the board's Top N sets how many units"
               data={unitMixData}
             />
             <BubbleChart
