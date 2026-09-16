@@ -154,8 +154,12 @@ export function DonutBar({
           </PieChart>
         </ResponsiveContainer>
 
-        <ResponsiveContainer width="100%" height={Math.max(160, barData.length * 34)}>
-          <BarChart data={barData} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 4 }} barCategoryGap={8}>
+        {/* A row per unit runs past a thousand pixels on a full fleet, which buries
+            everything below the card. The rows keep their height and the list
+            scrolls instead. */}
+        <div className="donutbar-rank">
+          <ResponsiveContainer width="100%" height={Math.max(160, barData.length * 34)}>
+            <BarChart data={barData} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 4 }} barCategoryGap={8}>
             <XAxis type="number" hide />
             <YAxis type="category" dataKey="name" width={104} tick={{ fontSize: 11, fill: 'var(--ink-2)' }} axisLine={false} tickLine={false} />
             <Tooltip
@@ -184,8 +188,9 @@ export function DonutBar({
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               />
             </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   )

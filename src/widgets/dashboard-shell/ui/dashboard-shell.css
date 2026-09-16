@@ -235,6 +235,13 @@ table.ptable tbody tr:hover td:first-child { box-shadow: -3px 0 0 var(--sun); }
 }
 .unit-filter-pop .dchecklist { border: 0; background: none; padding: 0; max-height: 240px; min-width: 200px; }
 
+/* The ranked bars beside the donut: one row per unit outgrows the card on a full
+   fleet, so the list scrolls at a fixed height instead of stretching the page. */
+.donutbar-rank { max-height: 340px; overflow-y: auto; overflow-x: hidden; }
+.donutbar-rank::-webkit-scrollbar { width: 9px; }
+.donutbar-rank::-webkit-scrollbar-thumb { background: var(--line-cool); border-radius: 9px; }
+.donutbar-rank::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
+
 /* Which dots the bubble chart plots. Every plotted dot is labelled, so this is
    also how the labels are kept from crowding each other. */
 .bubble-pick { position: relative; }
