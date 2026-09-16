@@ -91,10 +91,8 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
   const [sub, setSub] = useState<SubTab>('overview')
   const [deskSel, setDeskSel] = useState<Set<string>>(new Set())
   const [deskFilterOn, setDeskFilterOn] = useState(false)
-  const [unitSel, setUnitSel] = useState<Set<number>>(new Set())
-  const [unitFilterOn, setUnitFilterOn] = useState(false)
   const [modalFamily, setModalFamily] = useState<string | null>(null)
-  const { family, metric, topN } = useDashFilters()
+  const { family, metric, topN, units: unitSel, unitsOn: unitFilterOn } = useDashFilters()
 
   const ledger = weeklyLedger(loads)
   const weeks = ledger.length
@@ -155,21 +153,10 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
     />
   )
 
-  const unitFilterToggle = (
-    <UnitFilterPopover
-      label="Filter by units"
-      on={unitFilterOn}
-      onToggle={setUnitFilterOn}
-      options={allUnitIds}
-      selected={unitSel}
-      onChange={setUnitSel}
-      render={(u) => `Unit ${u}`}
-    />
-  )
 
   const filterBar = (
     <>
-      <DashFilterBar families={familyNames} />
+      <DashFilterBar families={familyNames} unitOptions={allUnitIds} />
       {deskFilterToggle}
     </>
   )
@@ -189,6 +176,9 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
             </button>
           ))}
         </div>
+        {/* One filter row for the whole tab: it drives every card below, so
+            repeating it in each card header only made it look per-card. */}
+        <div className="dcontrols board-filters">{filterBar}</div>
       </div>
 
       <div className="subtab-fade" key={sub}>
@@ -212,7 +202,7 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               </div>
             </div>
 
-            <DispatcherTable rows={rows} extraControls={filterBar} onFormula={onFormula} />
+            <DispatcherTable rows={rows} onFormula={onFormula} />
             <DonutBar
               title="Desk Σ gross share"
               caption={`Top ${topN > 0 ? topN : 'all'} desks · donut + benchmark bar`}
@@ -289,12 +279,6 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               firstCol={(r) => <CountExpandCell items={r.units} noun="unit numbers" />}
               defaultSort="gross"
               minWidth={1020}
-              extraControls={
-                <>
-                  {filterBar}
-                  {unitFilterToggle}
-                </>
-              }
             />
             <BubbleChart
               title="Desk × units"
@@ -357,12 +341,6 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               firstCol={(r) => `Unit ${r.unitId}`}
               defaultSort="gross"
               minWidth={920}
-              extraControls={
-                <>
-                  {filterBar}
-                  {unitFilterToggle}
-                </>
-              }
             />
             <BubbleChart
               title="Units snapshot"

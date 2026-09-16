@@ -97,6 +97,8 @@
 .dash-range-clear:hover { color: var(--sun); }
 
 .dcard-inline-controls { display: flex; gap: 12px 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; justify-content: space-between; }
+/* The tab's own filter row, above every card it drives. */
+.board-filters { gap: 12px 14px; }
 .seg-pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
 
 .seg-pill {
@@ -223,6 +225,19 @@ table.ptable tbody tr:hover td:first-child { box-shadow: -3px 0 0 var(--sun); }
 /* The picker floats out of its own checkbox. In flow it rendered after the table,
    a screenful away from the control that opened it. */
 .unit-filter { position: relative; display: inline-flex; align-items: flex-end; }
+/* The board-wide unit filter, sat with Family / Metric / Top N. */
+.unit-filter-field { position: relative; }
+.unit-filter-btn { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; text-align: left; min-width: 132px; }
+.unit-filter-btn svg { flex-shrink: 0; opacity: .7; }
+.unit-filter-btn .unit-count-caret { margin-left: auto; }
+.unit-filter-btn.is-active { border-color: var(--sun); color: var(--sun-deep); background: var(--sun-soft); }
+.unit-filter-btn.is-active svg { opacity: 1; }
+.unit-filter-pop-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 8px;
+  font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3);
+}
+.unit-filter-pop-actions { display: inline-flex; gap: 10px; }
+
 /* Reopens the list once the filter is on — the checkbox only turns it on and off,
    so closing the panel no longer has to mean discarding the selection. */
 .unit-filter-count {

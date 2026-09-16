@@ -19,7 +19,6 @@ import { FamilyWeeklyHistogram } from '@/widgets/family-weekly-histogram/ui/Fami
 import { UnitWeeklyHistogram } from '@/widgets/unit-weekly-histogram/ui/UnitWeeklyHistogram'
 import { BubbleChart } from '@/widgets/bubble-chart/ui/BubbleChart'
 import { DonutBar } from '@/widgets/donut-bar/ui/DonutBar'
-import { UnitFilterPopover } from '@/widgets/premium-table/ui/UnitFilterPopover'
 import { formatMiles, formatMoney, formatRpm } from '@/shared/lib/format/number'
 
 /** The shared Metric drives the ranking of every table on the board, so the same
@@ -53,9 +52,7 @@ const SUB_TABS: { value: SubTab; label: string }[] = [
 
 export function TrailerTypeTab({ loads }: { loads: Load[] }) {
   const [sub, setSub] = useState<SubTab>('overview')
-  const [unitSel, setUnitSel] = useState<Set<number>>(new Set())
-  const [unitFilterOn, setUnitFilterOn] = useState(false)
-  const { family, metric, topN } = useDashFilters()
+  const { family, metric, topN, units: unitSel, unitsOn: unitFilterOn } = useDashFilters()
 
   const allFamilies = familyShare(loads)
   const familyNames = allFamilies.map((f) => f.family)
@@ -144,7 +141,7 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
     [units],
   )
 
-  const filterBar = <DashFilterBar families={familyNames} />
+  const filterBar = <DashFilterBar families={familyNames} unitOptions={allUnits} />
 
   return (
     <>
@@ -161,12 +158,15 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
             </button>
           ))}
         </div>
+        {/* One filter row for the whole tab: it drives every card below, so
+            repeating it in each card header only made it look per-card. */}
+        <div className="dcontrols board-filters">{filterBar}</div>
       </div>
 
       <div className="subtab-fade" key={sub}>
         {sub === 'overview' && (
           <>
-            <FamilyShareTable rows={families} weekCount={ledger.length} extraControls={filterBar} />
+            <FamilyShareTable rows={families} weekCount={ledger.length} />
             <DonutBar
               title="Mix · Σ gross share by trailer family"
               caption="Donut + benchmark bar · pick one family to weigh it against the rest"
@@ -194,20 +194,6 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
           <>
             <UnitsEconomicsTable
               rows={units}
-              extraControls={
-                <>
-                  {filterBar}
-                  <UnitFilterPopover
-                    label="Filter by units"
-                    on={unitFilterOn}
-                    onToggle={setUnitFilterOn}
-                    options={allUnits}
-                    selected={unitSel}
-                    onChange={setUnitSel}
-                    render={(u) => `Unit ${u}`}
-                  />
-                </>
-              }
             />
             <DonutBar
               title="Unit mix · Σ gross share"

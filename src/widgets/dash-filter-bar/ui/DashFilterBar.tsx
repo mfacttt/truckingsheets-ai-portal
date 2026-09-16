@@ -1,4 +1,5 @@
 import { DASH_METRICS, TOP_N_OPTIONS, useDashFilters, type DashMetric } from '@/entities/dashboard/model/dash-filters'
+import { UnitFilterButton } from './UnitFilterButton'
 
 /** The shared Family / Metric / Top N row. Rendered inside a card header so the
  *  same controls sit next to whichever table or chart the reader is looking at. */
@@ -6,10 +7,12 @@ export function DashFilterBar({
   families,
   showTopN = true,
   showMetric = true,
+  unitOptions,
 }: {
   families: string[]
   showTopN?: boolean
   showMetric?: boolean
+  unitOptions?: number[]
 }) {
   const { family, metric, topN, setFamily, setMetric, setTopN } = useDashFilters()
 
@@ -51,6 +54,8 @@ export function DashFilterBar({
           </select>
         </div>
       )}
+
+      {unitOptions && unitOptions.length > 0 && <UnitFilterButton options={unitOptions} />}
     </>
   )
 }
