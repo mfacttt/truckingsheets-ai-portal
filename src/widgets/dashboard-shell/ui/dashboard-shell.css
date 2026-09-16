@@ -223,10 +223,16 @@ table.ptable tbody tr:hover td:first-child { box-shadow: -3px 0 0 var(--sun); }
 /* The picker floats out of its own checkbox. In flow it rendered after the table,
    a screenful away from the control that opened it. */
 .unit-filter { position: relative; display: inline-flex; align-items: flex-end; }
+/* Reopens the list once the filter is on — the checkbox only turns it on and off,
+   so closing the panel no longer has to mean discarding the selection. */
 .unit-filter-count {
-  font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--sun-deep);
-  background: var(--sun-soft); border: 1px solid var(--sun-mist); border-radius: 999px; padding: 1px 6px;
+  display: inline-flex; align-items: center; gap: 5px; margin-left: 7px; cursor: pointer;
+  font: inherit; font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums;
+  color: var(--sun-deep); background: var(--sun-soft); border: 1px solid var(--sun-mist);
+  border-radius: 999px; padding: 2px 8px; transition: background .15s, border-color .15s;
 }
+.unit-filter-count:hover { background: var(--sun-mist); }
+.unit-filter-count:focus-visible { outline: 2px solid var(--sun); outline-offset: 1px; }
 /* Positioned by PopoverLayer on the body: the cards clip their overflow. */
 .unit-filter-pop {
   position: fixed; z-index: 60;
