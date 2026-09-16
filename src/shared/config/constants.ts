@@ -5,6 +5,7 @@ export const DISPATCH_SHEETS_URL = 'https://dispatchsheets.ai'
 
 export const CONTACT_EMAIL = 'ceo@soleidispatch.com'
 export const TELEGRAM_CHAT_URL = 'https://t.me/mfacttt'
+export const TELEGRAM_COMMUNITY_URL = 'https://t.me/mfacttt'
 export const TELEGRAM_CALL_URL = 'https://t.me/mfacttt'
 
 // --- shared Solei identity-service auth (same account as Dispatch Sheets AI) ---

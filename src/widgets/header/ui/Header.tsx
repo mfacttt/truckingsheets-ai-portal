@@ -60,6 +60,7 @@ const LANDING_NAV = [
   { to: '/#features', label: 'Features' },
   { to: '/#pricing', label: 'Pricing' },
   { to: '/#products', label: 'Products' },
+  { to: '/#contact', label: 'Contact' },
   { to: '/#faq', label: 'FAQ' },
 ]
 

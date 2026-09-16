@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL, TELEGRAM_CALL_URL, TELEGRAM_CHAT_URL } from '@/shared/config/constants'
+import { TELEGRAM_CALL_URL, TELEGRAM_CHAT_URL, TELEGRAM_COMMUNITY_URL } from '@/shared/config/constants'
 import '@/pages/contact/ui/contact.css'
 
 const CHANNELS = [
@@ -12,10 +12,10 @@ const CHANNELS = [
   },
   {
     key: 'community',
-    title: 'Email the team',
-    body: 'Prefer it in writing? Send the sheet and the week you are looking at, and we will reply with what we find.',
-    cta: CONTACT_EMAIL,
-    href: `mailto:${CONTACT_EMAIL}`,
+    title: 'Join the community',
+    body: 'Tips from other fleet owners and dispatchers, product updates, and a place to compare notes.',
+    cta: 'Join channel',
+    href: TELEGRAM_COMMUNITY_URL,
     tone: 'community',
   },
   {
@@ -42,7 +42,8 @@ export function Contact() {
             <a
               key={c.key}
               href={c.href}
-              {...(c.href.startsWith('mailto:') ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
+              target="_blank"
+              rel="noopener noreferrer"
               className={`contact-card contact-${c.tone}`}
             >
               <span className="contact-ic" aria-hidden="true">
@@ -81,7 +82,7 @@ function ChannelIcon({ tone }: { tone: 'chat' | 'community' | 'call' }) {
   if (tone === 'community') {
     return (
       <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-        <path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4.24-8 4.5-8-4.5V6l8 4.5L20 6v2.24Z" />
+        <path fill="currentColor" d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-8 2c-2.67 0-6 1.34-6 4v2h8v-2c0-1.06.36-2.06 1.03-2.9A9.3 9.3 0 0 0 8 13Zm8 0c-.6 0-1.32.07-2.03.23A5.5 5.5 0 0 1 15 17v2h7v-2c0-2.66-3.33-4-6-4Z" />
       </svg>
     )
   }
