@@ -75,7 +75,9 @@ export function BubbleChart({
         <div className="dcard-title">
           <h2>{title}</h2>
           <p>
-            <span className="badge-3bm">3 Bubble Metrics</span>
+            {/* Counted, not asserted: pointing two of the pickers at the same
+                metric leaves the dot saying one thing twice. */}
+            <span className="badge-3bm">{new Set([x, y, z]).size} Bubble Metrics</span>
             Each dot is one {title.toLowerCase().includes('unit') ? 'truck' : title.toLowerCase().includes('dispatcher') ? 'desk' : 'family'} — position and size are set by the three pickers below.
           </p>
         </div>

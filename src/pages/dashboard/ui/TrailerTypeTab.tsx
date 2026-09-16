@@ -180,7 +180,7 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
               colorOf={(name) => familyColor(name)}
               defaultX="loads"
               defaultY="gross"
-              defaultZ="gross"
+              defaultZ="avgLoadRate"
             />
             <FamilyWeeklyHistogram
               loads={histogramLoads}
@@ -220,7 +220,7 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
               colorOf={(_n, i) => deskColor(i)}
               defaultX="loads"
               defaultY="gross"
-              defaultZ="gross"
+              defaultZ="avgLoadRate"
             />
             <UnitWeeklyHistogram loads={unitScoped} unitIds={units.map((u) => u.unitId)} />
           </>

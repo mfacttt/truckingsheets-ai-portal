@@ -370,7 +370,7 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               colorOf={(_n, i) => deskColor(i)}
               defaultX="loads"
               defaultY="gross"
-              defaultZ="gross"
+              defaultZ="avgLoadRate"
             />
           </>
         )}
