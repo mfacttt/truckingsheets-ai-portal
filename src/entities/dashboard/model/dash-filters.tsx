@@ -15,16 +15,19 @@ export const DASH_METRICS: { value: DashMetric; label: string }[] = [
 export const TOP_N_OPTIONS = [10, 15, 20, 0] as const
 
 interface DashFilters {
-  family: string
+  /** Empty means every family — the boards open on the whole fleet. */
+  families: Set<string>
   metric: DashMetric
   topN: number
   units: Set<number>
   unitsOn: boolean
-  setFamily(v: string): void
+  setFamilies(v: Set<string>): void
   setMetric(v: DashMetric): void
   setTopN(v: number): void
   setUnits(v: Set<number>): void
   setUnitsOn(v: boolean): void
+  /** True when the row's family is among the picked ones. */
+  keepsFamily(family: string): boolean
 }
 
 const DashFiltersContext = createContext<DashFilters | null>(null)
@@ -32,7 +35,7 @@ const DashFiltersContext = createContext<DashFilters | null>(null)
 /** One filter set shared by every table and chart on the dashboard, so changing it
  *  anywhere applies everywhere — the boards are meant to be read together. */
 export function DashFiltersProvider({ children }: { children: ReactNode }) {
-  const [family, setFamily] = useState('All')
+  const [families, setFamilies] = useState<Set<string>>(new Set())
   const [metric, setMetric] = useState<DashMetric>('gross')
   const [topN, setTopN] = useState<number>(15)
   // The unit pick belongs here rather than in a tab: the same trucks are meant to
@@ -41,8 +44,20 @@ export function DashFiltersProvider({ children }: { children: ReactNode }) {
   const [unitsOn, setUnitsOn] = useState(false)
 
   const value = useMemo<DashFilters>(
-    () => ({ family, metric, topN, units, unitsOn, setFamily, setMetric, setTopN, setUnits, setUnitsOn }),
-    [family, metric, topN, units, unitsOn],
+    () => ({
+      families,
+      metric,
+      topN,
+      units,
+      unitsOn,
+      setFamilies,
+      setMetric,
+      setTopN,
+      setUnits,
+      setUnitsOn,
+      keepsFamily: (f: string) => families.size === 0 || families.has(f),
+    }),
+    [families, metric, topN, units, unitsOn],
   )
   return <DashFiltersContext.Provider value={value}>{children}</DashFiltersContext.Provider>
 }

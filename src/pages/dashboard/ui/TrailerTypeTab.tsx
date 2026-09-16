@@ -52,17 +52,14 @@ const SUB_TABS: { value: SubTab; label: string }[] = [
 
 export function TrailerTypeTab({ loads }: { loads: Load[] }) {
   const [sub, setSub] = useState<SubTab>('overview')
-  const { family, metric, topN, units: unitSel, unitsOn: unitFilterOn } = useDashFilters()
+  const { keepsFamily, metric, topN, units: unitSel, unitsOn: unitFilterOn } = useDashFilters()
 
   const allFamilies = familyShare(loads)
   const familyNames = allFamilies.map((f) => f.family)
   const ledger = weeklyLedger(loads)
   const ledgerWeeks = ledger.length
 
-  const scopedLoads = useMemo(
-    () => (family === 'All' ? loads : loads.filter((l) => l.family === family)),
-    [loads, family],
-  )
+  const scopedLoads = useMemo(() => loads.filter((l) => keepsFamily(l.family)), [loads, keepsFamily])
 
   // Tables and the donut follow the same Family pick as everything else on the board.
   const families = useMemo(() => {
@@ -89,10 +86,10 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
   const famBubbles = useMemo(() => bubbleByFamily(scopedLoads, ledger.length), [scopedLoads, ledger.length])
   const unitBubbles = useMemo(() => bubbleByUnit(unitScoped, ledger.length), [unitScoped, ledger.length])
 
-  // Histograms stay readable on a single-family pick by keeping every family in the
-  // series list — narrowing to one series is what made them show a lone column.
-  const histogramFamilies = family === 'All' ? familyNames : [family]
-  const histogramLoads = family === 'All' ? loads : scopedLoads
+  // The histogram keeps every family in its series list and lets its own picker
+  // narrow them, so a family pick on the board does not leave it a lone column.
+  const histogramFamilies = familyNames
+  const histogramLoads = loads
 
   const donutData = families.map((f) => ({
     name: f.family,
@@ -141,7 +138,8 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
     [units],
   )
 
-  const filterBar = <DashFilterBar families={familyNames} unitOptions={allUnits} />
+  // Units only where units are the subject: the overview is about trailer types.
+  const filterBar = <DashFilterBar families={familyNames} {...(sub === 'units' ? { unitOptions: allUnits } : {})} />
 
   return (
     <>

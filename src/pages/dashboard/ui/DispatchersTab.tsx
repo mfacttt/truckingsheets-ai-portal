@@ -92,7 +92,7 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
   const [deskSel, setDeskSel] = useState<Set<string>>(new Set())
   const [deskFilterOn, setDeskFilterOn] = useState(false)
   const [modalFamily, setModalFamily] = useState<string | null>(null)
-  const { family, metric, topN, units: unitSel, unitsOn: unitFilterOn } = useDashFilters()
+  const { keepsFamily, metric, topN, units: unitSel, unitsOn: unitFilterOn } = useDashFilters()
 
   const ledger = weeklyLedger(loads)
   const weeks = ledger.length
@@ -100,10 +100,10 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
   const familyNames = families.map((f) => f.family)
 
   const scoped = useMemo(() => {
-    let out = family === 'All' ? loads : loads.filter((l) => l.family === family)
+    let out = loads.filter((l) => keepsFamily(l.family))
     if (deskFilterOn) out = out.filter((l) => deskSel.has(l.dispatcher))
     return out
-  }, [loads, family, deskFilterOn, deskSel])
+  }, [loads, keepsFamily, deskFilterOn, deskSel])
 
   const allRows = dispatcherRows(scoped, weeks)
   const rows = topN > 0 ? allRows.slice(0, topN) : allRows
@@ -156,7 +156,8 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
 
   const filterBar = (
     <>
-      <DashFilterBar families={familyNames} unitOptions={allUnitIds} />
+      {/* Units only where units are the subject: the overview is about desks. */}
+      <DashFilterBar families={familyNames} {...(sub === 'overview' ? {} : { unitOptions: allUnitIds })} />
       {deskFilterToggle}
     </>
   )

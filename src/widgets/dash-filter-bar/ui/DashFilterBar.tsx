@@ -1,8 +1,9 @@
 import { DASH_METRICS, TOP_N_OPTIONS, useDashFilters, type DashMetric } from '@/entities/dashboard/model/dash-filters'
-import { UnitFilterButton } from './UnitFilterButton'
+import { deskColor, familyColor } from '@/entities/dashboard/lib/aggregate'
+import { MultiFilterButton } from './MultiFilterButton'
 
-/** The shared Family / Metric / Top N row. Rendered inside a card header so the
- *  same controls sit next to whichever table or chart the reader is looking at. */
+/** The shared Family / Metric / Top N / Units row. It drives every card on the
+ *  tab, so it is rendered once above them rather than in each card header. */
 export function DashFilterBar({
   families,
   showTopN = true,
@@ -14,19 +15,29 @@ export function DashFilterBar({
   showMetric?: boolean
   unitOptions?: number[]
 }) {
-  const { family, metric, topN, setFamily, setMetric, setTopN } = useDashFilters()
+  const {
+    families: pickedFamilies,
+    metric,
+    topN,
+    units,
+    unitsOn,
+    setFamilies,
+    setMetric,
+    setTopN,
+    setUnits,
+    setUnitsOn,
+  } = useDashFilters()
 
   return (
     <>
-      <div className="dfield">
-        <label>Family</label>
-        <select className="dselect" value={family} onChange={(e) => setFamily(e.target.value)} style={{ minWidth: 130 }}>
-          <option value="All">All families</option>
-          {families.map((f) => (
-            <option key={f} value={f}>{f}</option>
-          ))}
-        </select>
-      </div>
+      <MultiFilterButton
+        label="Family"
+        options={families}
+        picked={pickedFamilies}
+        onChange={setFamilies}
+        colorOf={(f) => familyColor(f)}
+        allLabel="All families"
+      />
 
       {showMetric && (
         <div className="dfield">
@@ -55,7 +66,20 @@ export function DashFilterBar({
         </div>
       )}
 
-      {unitOptions && unitOptions.length > 0 && <UnitFilterButton options={unitOptions} />}
+      {unitOptions && unitOptions.length > 0 && (
+        <MultiFilterButton<number>
+          label="Units"
+          options={unitOptions}
+          picked={unitsOn ? units : new Set<number>()}
+          onChange={(next) => {
+            setUnits(next)
+            setUnitsOn(next.size > 0)
+          }}
+          colorOf={(_u, i) => deskColor(i)}
+          render={(u) => `Unit ${u}`}
+          allLabel="All units"
+        />
+      )}
     </>
   )
 }
