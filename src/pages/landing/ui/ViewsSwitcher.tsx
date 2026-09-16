@@ -4,7 +4,9 @@ import {
   AreaChart,
   Bar,
   BarChart,
+  CartesianGrid,
   Cell,
+  LabelList,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -24,7 +26,12 @@ interface ViewDef {
   chart: ReactNode
 }
 
-const generalData = [55, 68, 61, 79, 72, 91, 84, 103, 98, 116].map((v, i) => ({ i, v }))
+// Thousands of dollars a week, the same units the axis is labelled in — the
+// series used to be bare numbers while the caption promised millions.
+const generalData = [118, 141, 133, 166, 158, 189, 176, 214, 226, 242].map((v, i) => ({
+  week: `W${i * 4 + 1}`,
+  v,
+}))
 const familyData = [
   { name: 'RGM', value: 2162, color: 'var(--fam-rgm)' },
   { name: 'Flatbed', value: 1607, color: 'var(--fam-flatbed)' },
@@ -38,6 +45,32 @@ const deskData = [
   { name: 'N. Brown', v: 529 },
   { name: 'B. Jackson', v: 430 },
 ]
+
+const familyTotal = familyData.reduce((s, d) => s + d.value, 0)
+
+/** Share written on the slice it belongs to: a ring of colours says which family
+ *  leads only if you already know the palette. */
+function renderFamilyShare({
+  cx, cy, midAngle, outerRadius, value,
+}: { cx: number; cy: number; midAngle: number; outerRadius: number; value: number }) {
+  const rad = Math.PI / 180
+  const r = outerRadius + 18
+  const x = cx + r * Math.cos(-midAngle * rad)
+  const y = cy + r * Math.sin(-midAngle * rad)
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="var(--ink)"
+      fontSize={10.5}
+      fontWeight={700}
+      textAnchor={x > cx ? 'start' : 'end'}
+      dominantBaseline="central"
+    >
+      {((100 * value) / familyTotal).toFixed(1)}%
+    </text>
+  )
+}
 const FS_ROWS = [
   ['idle', 'pickup', 'transit', 'transit', 'delivery', 'idle', 'pickup', 'transit', 'delivery', 'idle', 'pickup', 'transit', 'transit', 'delivery'],
   ['pickup', 'transit', 'delivery', 'idle', 'pickup', 'transit', 'transit', 'delivery', 'idle', 'idle', 'pickup', 'transit', 'delivery', 'idle'],
@@ -58,14 +91,29 @@ const VIEWS: ViewDef[] = [
       { v: '2,537', l: 'Loads · 36 units' },
     ],
     chart: (
-      <ResponsiveContainer width="100%" height={190}>
-        <AreaChart data={generalData} margin={{ top: 6, right: 4, bottom: 0, left: 4 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={generalData} margin={{ top: 6, right: 6, bottom: 16, left: 2 }}>
           <defs>
             <linearGradient id="vsGen" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="var(--sun)" stopOpacity={0.4} />
               <stop offset="100%" stopColor="var(--sun)" stopOpacity={0.02} />
             </linearGradient>
           </defs>
+          <CartesianGrid stroke="var(--line)" strokeDasharray="3 3" vertical={false} />
+          <XAxis
+            dataKey="week"
+            tick={{ fontSize: 10, fill: 'var(--ink-3)' }}
+            axisLine={false}
+            tickLine={false}
+            label={{ value: 'Ledger week', position: 'insideBottom', offset: -12, fontSize: 10, fill: 'var(--ink-3)' }}
+          />
+          <YAxis
+            width={44}
+            tick={{ fontSize: 10, fill: 'var(--ink-3)' }}
+            axisLine={false}
+            tickLine={false}
+            tickFormatter={(v: number) => `$${v}k`}
+          />
           <Area type="monotone" dataKey="v" stroke="var(--sun)" strokeWidth={2.5} fill="url(#vsGen)" />
         </AreaChart>
       </ResponsiveContainer>
@@ -83,9 +131,18 @@ const VIEWS: ViewDef[] = [
       { v: '5 families', l: 'tracked automatically' },
     ],
     chart: (
-      <ResponsiveContainer width="100%" height={190}>
-        <PieChart>
-          <Pie data={familyData} dataKey="value" nameKey="name" innerRadius={48} outerRadius={78} paddingAngle={2}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart margin={{ top: 4, right: 52, bottom: 4, left: 52 }}>
+          <Pie
+            data={familyData}
+            dataKey="value"
+            nameKey="name"
+            innerRadius={44}
+            outerRadius={72}
+            paddingAngle={2}
+            labelLine={false}
+            label={renderFamilyShare}
+          >
             {familyData.map((d) => (
               <Cell key={d.name} fill={d.color} stroke="var(--card)" strokeWidth={2} />
             ))}
@@ -106,9 +163,17 @@ const VIEWS: ViewDef[] = [
       { v: '13 desks', l: 'in the window' },
     ],
     chart: (
-      <ResponsiveContainer width="100%" height={190}>
-        <BarChart data={deskData} layout="vertical" margin={{ top: 4, right: 12, bottom: 4, left: 4 }} barCategoryGap={6}>
-          <XAxis type="number" hide />
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={deskData} layout="vertical" margin={{ top: 4, right: 54, bottom: 18, left: 4 }} barCategoryGap={6}>
+          <CartesianGrid stroke="var(--line)" strokeDasharray="3 3" horizontal={false} />
+          <XAxis
+            type="number"
+            tick={{ fontSize: 10, fill: 'var(--ink-3)' }}
+            axisLine={false}
+            tickLine={false}
+            tickFormatter={(v: number) => `$${v}k`}
+            label={{ value: 'Σ gross, $ thousands', position: 'insideBottom', offset: -12, fontSize: 10, fill: 'var(--ink-3)' }}
+          />
           <YAxis
             type="category"
             dataKey="name"
@@ -121,6 +186,15 @@ const VIEWS: ViewDef[] = [
             {deskData.map((_, i) => (
               <Cell key={i} fill={i === 0 ? 'var(--sun)' : 'var(--sky)'} />
             ))}
+            <LabelList
+              dataKey="v"
+              position="right"
+              fill="var(--ink)"
+              stroke="none"
+              fontSize={10.5}
+              fontWeight={600}
+              formatter={(v: number) => `$${v}k`}
+            />
           </Bar>
         </BarChart>
       </ResponsiveContainer>

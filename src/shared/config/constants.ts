@@ -3,6 +3,10 @@ export const MARKETPLACE_URL =
   'https://workspace.google.com/marketplace/app/dispatch_sheetsai/750221744829'
 export const DISPATCH_SHEETS_URL = 'https://dispatchsheets.ai'
 
+export const CONTACT_EMAIL = 'ceo@soleidispatch.com'
+export const TELEGRAM_CHAT_URL = 'https://t.me/mfacttt'
+export const TELEGRAM_CALL_URL = 'https://t.me/mfacttt'
+
 // --- shared Solei identity-service auth (same account as Dispatch Sheets AI) ---
 export const GATEWAY_BASE: string = import.meta.env.VITE_GATEWAY_BASE || 'https://api.soleidispatch.com'
 export const API_PREFIX = '/api'

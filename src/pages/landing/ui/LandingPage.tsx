@@ -8,6 +8,7 @@ import { FleetStatusStrip } from './FleetStatusStrip'
 import { Features } from './Features'
 import { Pricing } from './Pricing'
 import { ProductsShowcase } from './ProductsShowcase'
+import { Contact } from './Contact'
 import { Faq } from './Faq'
 import { CtaBand } from './CtaBand'
 import './landing.css'
@@ -68,6 +69,7 @@ export default function LandingPage() {
       <Features />
       <Pricing />
       <ProductsShowcase />
+      <Contact />
       <Faq />
       <CtaBand />
     </>

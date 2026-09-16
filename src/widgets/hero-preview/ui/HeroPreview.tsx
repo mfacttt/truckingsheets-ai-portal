@@ -75,16 +75,42 @@ export function HeroPreview() {
             <span>36 wks</span>
           </div>
           <ResponsiveContainer width="100%" height={148}>
-            <ComposedChart data={mounted ? WEEKS : WEEKS.map((d) => ({ ...d, gross: 0, rpm: 0 }))} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
+            <ComposedChart data={mounted ? WEEKS : WEEKS.map((d) => ({ ...d, gross: 0, rpm: 0 }))} margin={{ top: 4, right: 2, bottom: 12, left: 2 }}>
               <defs>
                 <linearGradient id="hpFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="var(--sun)" stopOpacity={0.4} />
                   <stop offset="100%" stopColor="var(--sun)" stopOpacity={0.03} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="w" tick={{ fontSize: 9, fill: 'var(--ink-3)' }} axisLine={false} tickLine={false} interval={1} />
-              <YAxis yAxisId="l" hide domain={[80, 'dataMax + 20']} />
-              <YAxis yAxisId="r" hide domain={[2.9, 3.7]} />
+              {/* Both scales are drawn: with them hidden the two series had no
+                  units, so neither the money nor the rate could be read off. */}
+              <XAxis
+                dataKey="w"
+                tick={{ fontSize: 9, fill: 'var(--ink-3)' }}
+                axisLine={false}
+                tickLine={false}
+                interval={5}
+                label={{ value: 'Ledger week', position: 'insideBottom', offset: -10, fontSize: 9, fill: 'var(--ink-3)' }}
+              />
+              <YAxis
+                yAxisId="l"
+                domain={[80, 'dataMax + 20']}
+                width={38}
+                tick={{ fontSize: 9, fill: 'var(--ink-3)' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v: number) => `$${Math.round(v)}k`}
+              />
+              <YAxis
+                yAxisId="r"
+                orientation="right"
+                domain={[2.9, 3.7]}
+                width={36}
+                tick={{ fontSize: 9, fill: 'var(--ink-3)' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v: number) => `$${v.toFixed(2)}`}
+              />
               <Area
                 yAxisId="l"
                 type="monotone"
@@ -111,10 +137,10 @@ export function HeroPreview() {
 
         <div className="hp-legend">
           <span>
-            <i style={{ background: 'var(--sun)' }} /> Σ billed rate
+            <i style={{ background: 'var(--sun)' }} /> Σ billed rate · left, $k/wk
           </span>
           <span>
-            <i style={{ background: 'var(--sky)' }} /> Fleet RPM
+            <i style={{ background: 'var(--sky)' }} /> Fleet RPM · right, $/mi
           </span>
         </div>
       </div>

@@ -1,0 +1,39 @@
+.contact-wrap { max-width: 900px; text-align: center; }
+.contact-wrap h1 { margin: 14px 0 10px; }
+.contact-lede { color: var(--ink-3); font-size: 17px; max-width: 520px; margin: 0 auto 44px; }
+
+.contact-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  text-align: left;
+}
+.contact-card {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 26px 24px; border-radius: 18px;
+  background: var(--card); border: 1px solid var(--line);
+  color: var(--ink); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.contact-card:hover {
+  transform: translateY(-4px); text-decoration: none;
+  box-shadow: var(--shadow-lg); border-color: var(--sun);
+}
+.contact-card h2, .contact-card h3 { font-size: 18px; margin: 2px 0 0; }
+.contact-card p { color: var(--ink-3); font-size: 14.5px; line-height: 1.5; margin: 0; flex: 1; }
+
+.contact-ic {
+  width: 46px; height: 46px; border-radius: 13px; color: #fff;
+  display: grid; place-items: center; flex-shrink: 0;
+}
+.contact-chat .contact-ic { background: linear-gradient(135deg, #2AABEE, #229ED9); }
+.contact-community .contact-ic { background: linear-gradient(135deg, #7C6CF0, #5B4FD1); }
+.contact-call .contact-ic { background: linear-gradient(135deg, #34C77B, #26A866); }
+
+.contact-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-weight: 600; font-size: 14.5px; color: var(--sun-deep); margin-top: 4px;
+}
+.contact-cta svg { transition: transform .18s ease; }
+.contact-card:hover .contact-cta svg { transform: translateX(3px); }
+
+@media (max-width: 760px) {
+  .contact-grid { grid-template-columns: 1fr; }
+}

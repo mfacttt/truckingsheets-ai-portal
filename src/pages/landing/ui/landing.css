@@ -74,7 +74,10 @@
   background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden;
   box-shadow: var(--shadow-md); display: grid; grid-template-columns: minmax(0, 1fr) 320px;
 }
-.views-canvas { padding: 26px 28px; border-right: 1px solid var(--line); min-width: 0; }
+/* The chart takes the height the heading leaves it, rather than sitting at a
+   fixed size with the panel's remaining space empty underneath. */
+.views-canvas { padding: 26px 28px; border-right: 1px solid var(--line); min-width: 0; display: flex; flex-direction: column; }
+.views-canvas > :last-child { flex: 1; min-height: 260px; }
 .views-canvas-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
 .views-canvas-head h3 { font-size: 1.15rem; }
 .views-canvas-head span { font-size: 12px; color: var(--ink-3); }
