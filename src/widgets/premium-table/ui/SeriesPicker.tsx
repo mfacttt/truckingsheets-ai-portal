@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
+import { PopoverLayer } from './PopoverLayer'
 
 /** The dropdown that chooses which series a chart draws. The colour swatches make
  *  it the chart's key as well, so nothing has to be spelled out beside the plot. */
@@ -22,22 +23,6 @@ export function SeriesPicker<T extends string | number>({
   const [open, setOpen] = useState(false)
   const box = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!open) return
-    function onDown(e: PointerEvent) {
-      if (!box.current?.contains(e.target as Node)) setOpen(false)
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('pointerdown', onDown)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('pointerdown', onDown)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [open])
-
   const shown = options.filter((o) => !hidden.has(o))
 
   function toggle(opt: T) {
@@ -54,27 +39,32 @@ export function SeriesPicker<T extends string | number>({
         {shown.length === options.length ? `All ${options.length} ${noun}` : `${shown.length} of ${options.length} ${noun}`}
         <span className="bubble-pick-caret">{open ? '▲' : '▼'}</span>
       </button>
-      {open && (
-        <div className="bubble-pick-pop">
-          <div className="dchecklist-head">
-            <button type="button" className="linklike" onClick={() => onChange(new Set())}>
-              All
-            </button>
-            <button type="button" className="linklike" onClick={() => onChange(new Set(options))}>
-              None
-            </button>
-          </div>
-          <div className="bubble-pick-list">
-            {options.map((opt, i) => (
-              <label key={String(opt)}>
-                <input type="checkbox" checked={!hidden.has(opt)} onChange={() => toggle(opt)} />
-                <i style={{ background: colorOf(opt, i) }} />
-                {render ? render(opt) : String(opt)}
-              </label>
-            ))}
-          </div>
+      <PopoverLayer
+        open={open}
+        anchor={box}
+        onClose={() => setOpen(false)}
+        align="right"
+        className="bubble-pick-pop"
+        label={noun}
+      >
+        <div className="dchecklist-head">
+          <button type="button" className="linklike" onClick={() => onChange(new Set())}>
+            All
+          </button>
+          <button type="button" className="linklike" onClick={() => onChange(new Set(options))}>
+            None
+          </button>
         </div>
-      )}
+        <div className="bubble-pick-list">
+          {options.map((opt, i) => (
+            <label key={String(opt)}>
+              <input type="checkbox" checked={!hidden.has(opt)} onChange={() => toggle(opt)} />
+              <i style={{ background: colorOf(opt, i) }} />
+              {render ? render(opt) : String(opt)}
+            </label>
+          ))}
+        </div>
+      </PopoverLayer>
     </div>
   )
 }
