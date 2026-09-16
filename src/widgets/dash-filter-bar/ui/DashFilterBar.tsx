@@ -2,18 +2,21 @@ import { DASH_METRICS, TOP_N_OPTIONS, useDashFilters, type DashMetric } from '@/
 import { deskColor, familyColor } from '@/entities/dashboard/lib/aggregate'
 import { MultiFilterButton } from './MultiFilterButton'
 
-/** The shared Family / Metric / Top N / Units row. It drives every card on the
- *  tab, so it is rendered once above them rather than in each card header. */
+/** The shared filter row. What it narrows — families, desks, units — is the same
+ *  for every card, so it sits once above them; Metric and Top N rank a table's
+ *  rows and stay in that table's header, where the rows they order are. */
 export function DashFilterBar({
   families,
-  showTopN = true,
-  showMetric = true,
+  showTopN = false,
+  showMetric = false,
+  showFamily = true,
   unitOptions,
   deskOptions,
 }: {
   families: string[]
   showTopN?: boolean
   showMetric?: boolean
+  showFamily?: boolean
   unitOptions?: number[]
   deskOptions?: string[]
 }) {
@@ -34,14 +37,16 @@ export function DashFilterBar({
 
   return (
     <>
-      <MultiFilterButton
-        label="Family"
-        options={families}
-        picked={pickedFamilies}
-        onChange={setFamilies}
-        colorOf={(f) => familyColor(f)}
-        allLabel="All families"
-      />
+      {showFamily && (
+        <MultiFilterButton
+          label="Family"
+          options={families}
+          picked={pickedFamilies}
+          onChange={setFamilies}
+          colorOf={(f) => familyColor(f)}
+          allLabel="All families"
+        />
+      )}
 
       {showMetric && (
         <div className="dfield">

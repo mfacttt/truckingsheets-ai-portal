@@ -140,6 +140,8 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
 
   // Units only where units are the subject: the overview is about trailer types.
   const filterBar = <DashFilterBar families={familyNames} {...(sub === 'units' ? { unitOptions: allUnits } : {})} />
+  // Metric and Top N rank a table's rows, so they ride in that table's header.
+  const rankControls = <DashFilterBar families={familyNames} showFamily={false} showMetric showTopN />
 
   return (
     <>
@@ -164,7 +166,7 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
       <div className="subtab-fade" key={sub}>
         {sub === 'overview' && (
           <>
-            <FamilyShareTable rows={families} weekCount={ledger.length} />
+            <FamilyShareTable rows={families} weekCount={ledger.length} extraControls={rankControls} />
             <DonutBar
               title="Mix · Σ gross share by trailer family"
               caption="Donut + benchmark bar · pick one family to weigh it against the rest"
@@ -190,9 +192,7 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
 
         {sub === 'units' && (
           <>
-            <UnitsEconomicsTable
-              rows={units}
-            />
+            <UnitsEconomicsTable rows={units} extraControls={rankControls} />
             <DonutBar
               title="Unit mix · Σ gross share"
               caption="Donut + benchmark bar · the board's Top N sets how many units"

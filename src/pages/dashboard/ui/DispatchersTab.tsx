@@ -146,6 +146,8 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
       {...(sub === 'overview' ? {} : { unitOptions: allUnitIds })}
     />
   )
+  // Metric and Top N rank a table's rows, so they ride in that table's header.
+  const rankControls = <DashFilterBar families={familyNames} showFamily={false} showMetric showTopN />
 
   return (
     <>
@@ -188,7 +190,7 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               </div>
             </div>
 
-            <DispatcherTable rows={rows} onFormula={onFormula} />
+            <DispatcherTable rows={rows} extraControls={rankControls} onFormula={onFormula} />
             <DonutBar
               title="Desk Σ gross share"
               caption={`Top ${topN > 0 ? topN : 'all'} desks · donut + benchmark bar`}
@@ -265,6 +267,7 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               firstCol={(r) => <CountExpandCell items={r.units} noun="unit numbers" />}
               defaultSort="gross"
               minWidth={1020}
+              extraControls={rankControls}
             />
             <BubbleChart
               title="Desk × units"
@@ -327,6 +330,7 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               firstCol={(r) => `Unit ${r.unitId}`}
               defaultSort="gross"
               minWidth={920}
+              extraControls={rankControls}
             />
             <BubbleChart
               title="Units snapshot"
