@@ -80,7 +80,7 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
     [scopedLoads],
   )
   const unitScoped = useMemo(
-    () => (unitFilterOn && unitSel.size > 0 ? scopedLoads.filter((l) => unitSel.has(l.unitId)) : scopedLoads),
+    () => (unitFilterOn ? scopedLoads.filter((l) => unitSel.has(l.unitId)) : scopedLoads),
     [scopedLoads, unitFilterOn, unitSel],
   )
 
@@ -198,11 +198,13 @@ export function TrailerTypeTab({ loads }: { loads: Load[] }) {
                 <>
                   {filterBar}
                   <UnitFilterPopover
+                    label="Filter by units"
                     on={unitFilterOn}
                     onToggle={setUnitFilterOn}
                     options={allUnits}
                     selected={unitSel}
                     onChange={setUnitSel}
+                    render={(u) => `Unit ${u}`}
                   />
                 </>
               }

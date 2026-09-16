@@ -31,11 +31,9 @@ export function Checklist<T extends string | number>({
         </div>
         {options.map((opt) => (
           <label key={String(opt)}>
-            <input
-              type="checkbox"
-              checked={selected.size === 0 || selected.has(opt)}
-              onChange={() => toggle(opt)}
-            />
+            {/* Strictly what is selected: treating an empty set as "everything"
+                made None a no-op, since clearing it ticked every box again. */}
+            <input type="checkbox" checked={selected.has(opt)} onChange={() => toggle(opt)} />
             {render ? render(opt) : String(opt)}
           </label>
         ))}

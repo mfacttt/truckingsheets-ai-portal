@@ -21,7 +21,6 @@ import { BubbleChart } from '@/widgets/bubble-chart/ui/BubbleChart'
 import { DonutBar } from '@/widgets/donut-bar/ui/DonutBar'
 import { RpmRankTables } from '@/widgets/rpm-rank-tables/ui/RpmRankTables'
 import { DeskWeekModal } from '@/widgets/desk-week-modal/ui/DeskWeekModal'
-import { Checklist } from '@/widgets/premium-table/ui/Checklist'
 import { UnitFilterPopover } from '@/widgets/premium-table/ui/UnitFilterPopover'
 import { CountExpandCell } from '@/widgets/premium-table/ui/CountExpandCell'
 import { PremiumTable, type PremiumColumn } from '@/widgets/premium-table/ui/PremiumTable'
@@ -104,7 +103,7 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
 
   const scoped = useMemo(() => {
     let out = family === 'All' ? loads : loads.filter((l) => l.family === family)
-    if (deskFilterOn && deskSel.size > 0) out = out.filter((l) => deskSel.has(l.dispatcher))
+    if (deskFilterOn) out = out.filter((l) => deskSel.has(l.dispatcher))
     return out
   }, [loads, family, deskFilterOn, deskSel])
 
@@ -126,7 +125,7 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
 
   const allUnitIds = useMemo(() => [...new Set(loads.map((l) => l.unitId))].sort((a, b) => a - b), [loads])
   const deskUnitScoped = useMemo(
-    () => (unitFilterOn && unitSel.size > 0 ? scoped.filter((l) => unitSel.has(l.unitId)) : scoped),
+    () => (unitFilterOn ? scoped.filter((l) => unitSel.has(l.unitId)) : scoped),
     [scoped, unitFilterOn, unitSel],
   )
   const dUnitRows = useMemo(() => {
@@ -146,19 +145,25 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
   }))
 
   const deskFilterToggle = (
-    <label className="dcheck">
-      <input type="checkbox" checked={deskFilterOn} onChange={(e) => setDeskFilterOn(e.target.checked)} />
-      Filter by dispatcher
-    </label>
+    <UnitFilterPopover
+      label="Filter by dispatcher"
+      on={deskFilterOn}
+      onToggle={setDeskFilterOn}
+      options={allDeskNames}
+      selected={deskSel}
+      onChange={setDeskSel}
+    />
   )
 
   const unitFilterToggle = (
     <UnitFilterPopover
+      label="Filter by units"
       on={unitFilterOn}
       onToggle={setUnitFilterOn}
       options={allUnitIds}
       selected={unitSel}
       onChange={setUnitSel}
+      render={(u) => `Unit ${u}`}
     />
   )
 
@@ -185,12 +190,6 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
           ))}
         </div>
       </div>
-
-      {deskFilterOn && (
-        <div className="dcontrols" style={{ marginBottom: 16 }}>
-          <Checklist label="Dispatchers" options={allDeskNames} selected={deskSel} onChange={setDeskSel} />
-        </div>
-      )}
 
       <div className="subtab-fade" key={sub}>
         {sub === 'overview' && (

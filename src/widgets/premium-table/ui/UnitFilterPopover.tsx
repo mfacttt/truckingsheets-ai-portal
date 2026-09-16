@@ -1,20 +1,24 @@
 import { useEffect, useRef } from 'react'
 import { Checklist } from './Checklist'
 
-/** The unit picker opens over the board from its own checkbox. Rendered in flow it
+/** The row filter opens over the board from its own checkbox. Rendered in flow it
  *  landed below the whole table, far from the control that summoned it. */
-export function UnitFilterPopover({
+export function UnitFilterPopover<T extends string | number>({
+  label,
   on,
   onToggle,
   options,
   selected,
   onChange,
+  render,
 }: {
+  label: string
   on: boolean
   onToggle(next: boolean): void
-  options: number[]
-  selected: Set<number>
-  onChange(next: Set<number>): void
+  options: T[]
+  selected: Set<T>
+  onChange(next: Set<T>): void
+  render?: (opt: T) => string
 }) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -34,18 +38,29 @@ export function UnitFilterPopover({
     }
   }, [on, onToggle])
 
-  const count = selected.size
+  // Switching the filter on starts from everything ticked, so an empty set can
+  // mean what it says — none — instead of doubling as "no filter yet".
+  function setOn(next: boolean) {
+    if (next && selected.size === 0) onChange(new Set(options))
+    onToggle(next)
+  }
 
   return (
     <div className="unit-filter" ref={ref}>
       <label className="dcheck">
-        <input type="checkbox" checked={on} onChange={(e) => onToggle(e.target.checked)} />
-        Filter by units
-        {on && count > 0 && <span className="unit-filter-count">{count}</span>}
+        <input type="checkbox" checked={on} onChange={(e) => setOn(e.target.checked)} />
+        {label}
+        {on && <span className="unit-filter-count">{selected.size}</span>}
       </label>
       {on && (
-        <div className="unit-filter-pop" role="group" aria-label="Units">
-          <Checklist label="Units" options={options} selected={selected} onChange={onChange} render={(u) => `Unit ${u}`} />
+        <div className="unit-filter-pop" role="group" aria-label={label}>
+          <Checklist
+            label={label}
+            options={options}
+            selected={selected}
+            onChange={onChange}
+            {...(render ? { render } : {})}
+          />
         </div>
       )}
     </div>
