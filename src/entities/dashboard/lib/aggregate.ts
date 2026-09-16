@@ -430,16 +430,6 @@ export function deskColor(index: number): string {
   return DESK_PALETTE[index % DESK_PALETTE.length] ?? '#94A3B8'
 }
 
-// ---- MIN LOADS floor for desk RPM ranking (matches Helios MIN_LOADS_DISPATCH_RPM) ----
-export const MIN_LOADS_DISPATCH_RPM = 25
-
-export function deskRpmRanked(loads: Load[]): { best: DispatcherRow[]; worst: DispatcherRow[] } {
-  const eligible = dispatcherRows(loads).filter((d) => d.loads >= MIN_LOADS_DISPATCH_RPM)
-  const byRpmDesc = [...eligible].sort((a, b) => b.rpm - a.rpm)
-  const byRpmAsc = [...eligible].sort((a, b) => a.rpm - b.rpm)
-  return { best: byRpmDesc.slice(0, 10), worst: byRpmAsc.slice(0, 10) }
-}
-
 // ---- generic bubble/scatter datapoint over any grouped entity ----
 export type BubbleMetric =
   | 'loads'

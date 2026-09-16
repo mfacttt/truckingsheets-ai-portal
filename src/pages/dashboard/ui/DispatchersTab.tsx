@@ -3,7 +3,6 @@ import {
   bubbleByDesk,
   bubbleByUnit,
   deskColor,
-  deskRpmRanked,
   deskUnitRows,
   dispatcherRows,
   familyShare,
@@ -13,13 +12,13 @@ import {
 } from '@/entities/dashboard/lib/aggregate'
 import type { DeskUnitRow, UnitEconomicsRow } from '@/entities/dashboard/lib/aggregate'
 import type { Load } from '@/entities/dashboard/model/types'
-import { useDashFilters, type DashMetric } from '@/entities/dashboard/model/dash-filters'
+import { DASH_METRICS, useDashFilters, type DashMetric } from '@/entities/dashboard/model/dash-filters'
 import { DashFilterBar } from '@/widgets/dash-filter-bar/ui/DashFilterBar'
 import { DispatcherTable } from '@/widgets/dispatcher-table/ui/DispatcherTable'
 import { DispatcherTrend } from '@/widgets/dispatcher-trend/ui/DispatcherTrend'
 import { BubbleChart } from '@/widgets/bubble-chart/ui/BubbleChart'
 import { DonutBar } from '@/widgets/donut-bar/ui/DonutBar'
-import { RpmRankTables } from '@/widgets/rpm-rank-tables/ui/RpmRankTables'
+import { MetricRankBar } from '@/widgets/metric-rank-bar/ui/MetricRankBar'
 import { DeskWeekModal } from '@/widgets/desk-week-modal/ui/DeskWeekModal'
 import { CountExpandCell } from '@/widgets/premium-table/ui/CountExpandCell'
 import { PremiumTable, type PremiumColumn } from '@/widgets/premium-table/ui/PremiumTable'
@@ -31,6 +30,16 @@ const DESK_UNIT_METRIC_VALUE: Record<DashMetric, (r: DeskUnitRow) => number> = {
   rpm: (r) => r.rpm,
   miles: (r) => r.miles,
   avgGrossWeekUnit: (r) => (r.unitCount > 0 ? r.avgGrossPerWeek / r.unitCount : 0),
+  avgLoadRate: (r) => r.avgLoadRate,
+  loads: (r) => r.loads,
+}
+
+const UNIT_METRIC_VALUE: Record<DashMetric, (r: UnitEconomicsRow) => number> = {
+  gross: (r) => r.gross,
+  avgGrossWk: (r) => r.avgGrossPerWeekLedger,
+  rpm: (r) => r.rpm,
+  miles: (r) => r.miles,
+  avgGrossWeekUnit: (r) => r.avgGrossPerWeekLedger,
   avgLoadRate: (r) => r.avgLoadRate,
   loads: (r) => r.loads,
 }
@@ -96,10 +105,10 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
   const families = familyShare(loads)
   const familyNames = families.map((f) => f.family)
 
-  const scoped = useMemo(() => {
-    let out = loads.filter((l) => keepsFamily(l.family))
-    return out.filter((l) => keepsDesk(l.dispatcher))
-  }, [loads, keepsFamily, keepsDesk])
+  const scoped = useMemo(
+    () => loads.filter((l) => keepsFamily(l.family) && keepsDesk(l.dispatcher)),
+    [loads, keepsFamily, keepsDesk],
+  )
 
   const allRows = dispatcherRows(scoped, weeks)
   const rows = topN > 0 ? allRows.slice(0, topN) : allRows
@@ -115,7 +124,6 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
     () => bubbleByDesk(scoped, weeks).slice(0, topN > 0 ? topN : 30),
     [scoped, weeks, topN],
   )
-  const { best, worst } = useMemo(() => deskRpmRanked(scoped), [scoped])
 
   const allUnitIds = useMemo(() => [...new Set(loads.map((l) => l.unitId))].sort((a, b) => a - b), [loads])
   const deskUnitScoped = useMemo(
@@ -127,8 +135,20 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
     const ranked = [...all].sort((a, b) => DESK_UNIT_METRIC_VALUE[metric](b) - DESK_UNIT_METRIC_VALUE[metric](a))
     return topN > 0 ? ranked.slice(0, topN) : ranked
   }, [deskUnitScoped, weeks, metric, topN])
+  const deskUnitBars = useMemo(
+    () => dUnitRows.map((r, i) => ({ name: r.desk, value: DESK_UNIT_METRIC_VALUE[metric](r), color: deskColor(i) })),
+    [dUnitRows, metric],
+  )
+  const metricLabel = DASH_METRICS.find((m) => m.value === metric)?.label ?? ''
   const allUnitRows = useMemo(() => unitEconomics(deskUnitScoped, weeks), [deskUnitScoped, weeks])
-  const unitRows = topN > 0 ? allUnitRows.slice(0, topN) : allUnitRows
+  const unitRows = useMemo(() => {
+    const ranked = [...allUnitRows].sort((a, b) => UNIT_METRIC_VALUE[metric](b) - UNIT_METRIC_VALUE[metric](a))
+    return topN > 0 ? ranked.slice(0, topN) : ranked
+  }, [allUnitRows, metric, topN])
+  const unitBars = useMemo(
+    () => unitRows.map((r, i) => ({ name: `Unit ${r.unitId}`, value: UNIT_METRIC_VALUE[metric](r), color: deskColor(i) })),
+    [unitRows, metric],
+  )
   const unitBubbles = useMemo(() => bubbleByUnit(deskUnitScoped, weeks), [deskUnitScoped, weeks])
 
   const donutData = rows.map((r, i) => ({
@@ -191,13 +211,20 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
             </div>
 
             <DispatcherTable rows={rows} extraControls={rankControls} onFormula={onFormula} />
+            <BubbleChart
+              title="Dispatcher snapshot"
+              points={deskBubbles}
+              colorOf={(_n, i) => deskColor(i)}
+              defaultX="loads"
+              defaultY="gross"
+              defaultZ="gross"
+            />
             <DonutBar
               title="Desk Σ gross share"
               caption={`Top ${topN > 0 ? topN : 'all'} desks · donut + benchmark bar`}
               data={donutData}
             />
             <DispatcherTrend loads={scoped} desks={topDeskNames} />
-            <RpmRankTables best={best} worst={worst} />
 
             <div className="dcard">
               <div className="dcard-head">
@@ -277,6 +304,13 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               defaultY="avgGrossWeek"
               defaultZ="gross"
             />
+            <MetricRankBar
+              title="Desk × units · bar"
+              caption={`${metricLabel} per dispatcher · ranked · follows the Metric and Top N above`}
+              data={deskUnitBars}
+              metric={metric}
+              metricLabel={metricLabel}
+            />
           </>
         )}
 
@@ -339,6 +373,13 @@ export function DispatchersTab({ loads, onFormula }: { loads: Load[]; onFormula(
               defaultX="loads"
               defaultY="gross"
               defaultZ="avgLoadRate"
+            />
+            <MetricRankBar
+              title="Units · bar"
+              caption={`${metricLabel} per unit · ranked · follows the Metric and Top N above`}
+              data={unitBars}
+              metric={metric}
+              metricLabel={metricLabel}
             />
           </>
         )}

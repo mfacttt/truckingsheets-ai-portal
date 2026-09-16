@@ -349,7 +349,6 @@ table.ptable tbody tr:hover td { filter: brightness(0.97); }
 .ptable-reset { font-size: 12.5px; }
 
 @media (max-width: 720px) { .donutbar-grid { grid-template-columns: 1fr !important; } }
-@media (max-width: 820px) { .rpmrank-grid { grid-template-columns: 1fr !important; } }
 
 @media (max-width: 700px) {
   .dcard { padding: 18px 16px; }
